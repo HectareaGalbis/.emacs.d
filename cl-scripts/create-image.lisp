@@ -17,10 +17,10 @@
   (format t "USAGE: ./~a IMAGE-FILE REQUIRED-SYSTEMS*~%" *script-file-name*)
   (quit))
 
-(when (member (car *arguments*) ("-h" "--help") :test string=)
+(when (member (car *arguments*) '("-h" "--help") :test #'string=)
   (format t "USAGE: ./~a.~a IMAGE-FILE REQUIRED-SYSTEMS*~%~%" (pathname-name (uiop:load-pathname)) (pathname-type (uiop:load-pathname)))
-  (format t "This script creates the file IMAGE-FILE containing a Lisp image. This image will have loaded the REQUIRED-SYSTEMS specified. Each system must be already installed and must be accessible to ASDF.~%")
-  (format t "Example to create an image containing alexandria and cl-ppcre systems:~%  ./~a new_core.image alexandria cl-ppcre"
+  (format t "This script creates the file IMAGE-FILE containing a Lisp image. This image will have loaded the REQUIRED-SYSTEMS specified. Each system must be already installed and must be accessible to ASDF.~%~%")
+  (format t "Example to create an image containing alexandria and cl-ppcre systems:~%  ./~a new_core.image alexandria cl-ppcre~%~%"
 	  *script-file-name*)
   (quit))
 
