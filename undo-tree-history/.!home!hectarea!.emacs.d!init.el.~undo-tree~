@@ -1,5 +1,0 @@
-(undo-tree-save-format-version . 1)
-"987b015c73a251d6964a1bdc9b92868441be673d"
-[nil nil nil nil (25438 28057 849725 266000) 0 nil]
-([nil current ((#("flymd " 0 6 (fontified t)) . 515) (undo-tree-id0 . -6) (undo-tree-id1 . -6) (undo-tree-id2 . -6) (undo-tree-id3 . -6) (t 25438 27912 677335 60000)) nil (25438 28057 849721 574000) 0 nil])
-nil
