@@ -8,7 +8,7 @@
  '(custom-safe-themes
    '("3199be8536de4a8300eaf9ce6d864a35aa802088c0925e944e2b74a574c68fd0" "a0415d8fc6aeec455376f0cbcc1bee5f8c408295d1c2b9a1336db6947b89dd98" default))
  '(package-selected-packages
-   '(dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+   '(exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
  '(undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -31,6 +31,7 @@
 (set-fringe-mode 10)                                         ; Give some breathing room
 (switch-to-buffer "new-file" nil t)                          ; The initial buffer should be an empty buffer
 (add-to-list 'initial-frame-alist '(fullscreen . maximized)) ; Initialize emacs maximized
+(setq frame-resize-pixelwise t)
 (setq indent-tabs-mode nil)
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
@@ -94,6 +95,9 @@
 (use-package doom-modeline
   :init (doom-modeline-mode 1))
 
+
+;; ----- cl-lib -----
+(require 'cl-lib)
 
 ;; ----- thing at point -----
 (require 'thingatpt)
@@ -352,7 +356,27 @@
 (defun update-project-directories ()
   (setq project-directories (append initial-project-directories (project-search-marks))))
 
-(defun get-project-files (dir &optional no-cache)
+(defun get-files-recursively (dir pat &optional abs)
+  "Return the list of files under the directory DIR that whose name matches PAT.
+If ABS is non-nil, the path will be absolute, otherwise relative."
+  (let (files)
+    (cl-labels ((aux (dir path rel-dir)
+                   (let ((cur-dir (expand-file-name rel-dir dir)))
+                     (dolist (name (directory-files cur-dir abs nil t))
+                       (unless (member name '("." ".."))
+                         (let ((fn (expand-file-name name cur-dir)))
+                           (cond
+                            ((file-directory-p fn)
+                             (aux dir pat (if (string= "" rel-dir)
+                                              name
+                                            (concat rel-dir "/" name))))
+                            ((string-match pat name)
+                             (unless (string= "" rel-dir)
+                               (push (concat rel-dir "/" name) files))))))))))
+      (aux dir pat "")
+      files)))
+
+(defun get-project-files (dir &optional abs no-cache)
   (let ((cached-files (if no-cache
 			  nil
 			(get-cache-data-project-files dir (read-projects-cache)))))
@@ -361,24 +385,30 @@
       (let* ((combined-regex (let ((current-regex (car project-file-regex)))
 			       (dolist (regex (cdr project-file-regex) current-regex)
 				 (setq current-regex (concat current-regex "\\|" regex)))))
-	     (time-and-result (measure-time (directory-files-recursively dir combined-regex)))
+	     (time-and-result (measure-time (get-files-recursively dir combined-regex)))
 	     (time (car time-and-result))
 	     (files (cadr time-and-result)))
 	(when (> time 1.0)
 	  (add-cache-project-files dir files))
 	files))))
 
+(defun parent-directory (file)
+  (if (equal file "/")
+      nil
+      (file-name-directory (directory-file-name file))))
+
 (defun get-current-project ()
   (let ((file (buffer-file-name)))
     (when file
-      (setq file (abbreviate-file-name file))
-      (let ((dir-found nil)
-	    (directories project-directories))
-	(while (and (not dir-found) (not (null directories)))
-	  (let ((dir (car directories)))
-	    (when (member file (get-project-files dir))
-	      (setq dir-found dir))
-	    (setq directories (cdr directories))))
+      (setq file (expand-file-name file))
+      (let ((parent-dir (parent-directory file))
+	    (dir-found nil)
+	    (directories (mapcar (lambda (dir)
+				   (expand-file-name (file-name-as-directory dir)))
+				 project-directories)))
+	(while (and (not dir-found) parent-dir)
+	  (setq dir-found (car (member parent-dir directories)))
+	  (setq parent-dir (parent-directory parent-dir)))
 	dir-found))))
 
 (defun select-project-file-no-cache (&optional dir)
@@ -401,10 +431,11 @@
   (unless dir
     (setq dir (get-current-project)))
   (if dir
-      (ivy-read "Select a file: " (get-project-files dir no-cache)
-		:action #'find-file
+      (ivy-read "Select a file: " (get-project-files dir nil no-cache)
+		:action (lambda (rel-path)
+			  (find-file (expand-file-name rel-path dir)))
 		:require-match nil)
-    (select-project)))
+    (select-project-and-file)))
 
 (defun select-project ()
   (interactive)
@@ -604,7 +635,9 @@
 		       ("Sandbox" "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/Sandbox")
 		       ("ProjectRouter" "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/ProjectRouter/ProjectRouter")))
 (defvar ue4-editor "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/UnrealEngine-4.27/Engine/Binaries/Linux/UE4Editor")
-(defvar ue5-editor "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/UnrealEngine5/Engine/Binaries/Linux/UnrealEditor")
+(defvar ue5-projects '(("LEVEL_UP_Project" "/home/hectarea/Unreal Projects/LEVEL_UP_Project")))
+(defvar ue5-editor "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/UnrealEngine5/Engine/Binaries/Linux/UnrealEditor-Cmd")
+
 
 (defun get-ue4-projects ()
   (mapcar #'car ue4-projects))
@@ -651,6 +684,48 @@
   (interactive)
   (if (y-or-n-p "Do you really want to open the Unreal Engine 4 editor?")
       (async-shell-command ue4-editor)))
+
+
+(defun get-ue5-projects ()
+  (mapcar #'car ue5-projects))
+
+(defun get-ue5-project-directory (project)
+  (let ((project-found nil)
+	(rest-ue5-projects ue5-projects))
+    (while (and (not project-found) (not (null rest-ue5-projects)))
+      (let ((current-project (caar rest-ue5-projects)))
+	(when (equal current-project project)
+	  (setq project-found (cadar rest-ue5-projects)))
+	(setq rest-ue5-projects (cdr rest-ue5-projects))))
+    (directory-file-name project-found)))
+
+(defun ue5-compile-project ()
+  (interactive)
+  (ivy-read "Select UE5 project: " (get-ue5-projects)
+	    :require-match t
+	    :action (lambda (project)
+		      (if (y-or-n-p (concat "Do you really want to compile " project "?"))
+			  (let ((project-dir (get-ue5-project-directory project)))
+			    (unless project-dir
+			      (error "Project '%s' not found" project))
+			    (let* ((makefile (concat project-dir "/Makefile"))
+				   (command (concat "make -f" makefile " " project "Editor")))
+			      (async-shell-command command)))
+			(ue5-compile-project)))))
+
+(defun ue5-open-project ()
+  (interactive)
+  (ivy-read "Select UE5 project: " (get-ue5-projects)
+	    :require-match t
+	    :action (lambda (project)
+		      (if (y-or-n-p (concat "Do you really want to open " project "?"))
+			  (let ((project-dir (get-ue5-project-directory project)))
+			    (unless project-dir
+			      (error "Project '%s' not found" project))
+			    (let* ((uproject (concat "\"" project-dir "/" project ".uproject" "\""))
+				   (command (concat ue5-editor " " uproject)))
+			      (async-shell-command command)))
+			(ue5-open-project)))))
 
 
 (defun ue5-run-editor ()
