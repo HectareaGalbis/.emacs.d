@@ -37,7 +37,7 @@
 (put 'downcase-region 'disabled nil)
 (delete-selection-mode 1)
 (global-set-key (kbd "C-c d") 'delete-pair)
-
+(set-face-attribute 'default nil :height 120)
 
 ;; ----- Emacs backup and autosave files -----
 (setq backup-directory-alist `(("." . ,(expand-file-name "tmp/backups/" user-emacs-directory))))             ; Put backup files (ie foo~) in ~/.emacs.d/.
@@ -357,22 +357,25 @@
   (setq project-directories (append initial-project-directories (project-search-marks))))
 
 (defun get-files-recursively (dir pat &optional abs)
-  "Return the list of files under the directory DIR that whose name matches PAT.
+  "Return the list of files under the directory DIR whose name matches PAT.
 If ABS is non-nil, the path will be absolute, otherwise relative."
   (let (files)
     (cl-labels ((aux (dir path rel-dir)
-                   (let ((cur-dir (expand-file-name rel-dir dir)))
-                     (dolist (name (directory-files cur-dir abs nil t))
-                       (unless (member name '("." ".."))
-                         (let ((fn (expand-file-name name cur-dir)))
-                           (cond
-                            ((file-directory-p fn)
-                             (aux dir pat (if (string= "" rel-dir)
-                                              name
-                                            (concat rel-dir "/" name))))
-                            ((string-match pat name)
-                             (unless (string= "" rel-dir)
-                               (push (concat rel-dir "/" name) files))))))))))
+                     (let ((cur-dir (expand-file-name rel-dir dir)))
+                       (dolist (name (directory-files cur-dir nil nil t))
+			 (unless (member name '("." ".."))
+                           (let ((fn (expand-file-name name cur-dir))
+				 (rel-name (if (string= "" rel-dir)
+					       name
+                                             (concat rel-dir "/" name))))
+                             (cond
+                              ((file-directory-p fn)
+                               (aux dir pat rel-name))
+                              ((string-match pat name)
+                               (push (if abs
+					 (expand-file-name rel-name dir)
+				       rel-name)
+				     files)))))))))
       (aux dir pat "")
       files)))
 
@@ -392,7 +395,7 @@ If ABS is non-nil, the path will be absolute, otherwise relative."
 	  (add-cache-project-files dir files))
 	files))))
 
-(defun parent-directory (file)
+(defun project-parent-directory (file)
   (if (equal file "/")
       nil
       (file-name-directory (directory-file-name file))))
@@ -401,14 +404,14 @@ If ABS is non-nil, the path will be absolute, otherwise relative."
   (let ((file (buffer-file-name)))
     (when file
       (setq file (expand-file-name file))
-      (let ((parent-dir (parent-directory file))
+      (let ((parent-dir (project-parent-directory file))
 	    (dir-found nil)
 	    (directories (mapcar (lambda (dir)
 				   (expand-file-name (file-name-as-directory dir)))
 				 project-directories)))
 	(while (and (not dir-found) parent-dir)
 	  (setq dir-found (car (member parent-dir directories)))
-	  (setq parent-dir (parent-directory parent-dir)))
+	  (setq parent-dir (project-parent-directory parent-dir)))
 	dir-found))))
 
 (defun select-project-file-no-cache (&optional dir)
