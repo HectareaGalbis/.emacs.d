@@ -37,7 +37,7 @@
 (put 'downcase-region 'disabled nil)
 (delete-selection-mode 1)
 (global-set-key (kbd "C-c d") 'delete-pair)
-(set-face-attribute 'default nil :height 120)
+(set-face-attribute 'default nil :height 100)
 
 ;; ----- Emacs backup and autosave files -----
 (setq backup-directory-alist `(("." . ,(expand-file-name "tmp/backups/" user-emacs-directory))))             ; Put backup files (ie foo~) in ~/.emacs.d/.
