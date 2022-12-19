@@ -265,10 +265,7 @@
 (defvar project-regex-marks '("\\.git$"))
 (defvar project-search-for-marks-from '("~/quicklisp/local-projects"
 					"~/GitHub"))
-(defvar initial-project-directories '("/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/PChaos/ProjectChaos/Source"
-				      "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/ProjectRouter/ProjectRouter/Source"
-				      "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/Sandbox/Source"
-				      "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/UnrealEngine-4.27/Engine/Source"))
+(defvar initial-project-directories '())
 (defvar project-directories nil)
 (defvar project-file-regex '("\\.h$"
 			     "\\.c$"
