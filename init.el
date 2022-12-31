@@ -38,6 +38,10 @@
 (delete-selection-mode 1)
 (global-set-key (kbd "C-c d") 'delete-pair)
 (set-face-attribute 'default nil :height 100)
+(global-set-key (kbd "M-<right>") 'enlarge-window-horizontally)
+(global-set-key (kbd "M-<left>") 'shrink-window-horizontally)
+(setq browse-url-browser-function 'eww-browse-url)           ; Set the the default url browser
+
 
 ;; ----- Emacs backup and autosave files -----
 (setq backup-directory-alist `(("." . ,(expand-file-name "tmp/backups/" user-emacs-directory))))             ; Put backup files (ie foo~) in ~/.emacs.d/.
@@ -123,9 +127,22 @@
   (slime-quit-lisp)
   (kill-buffer "*inferior lisp*"))
 
+(defun hyperspec-lookup-other-window (symbol-name)
+  "Another wrapper for hyperspec-lookup"
+  (interactive (list (common-lisp-hyperspec-read-symbol-name
+                      (slime-symbol-at-point))))
+  (let ((window-to-use (or (get-buffer-window "*eww*")
+			   (if (and (eq browse-url-browser-function 'eww-browse-url)
+				    (= (count-windows) 1))
+			       (split-window-right)
+			     (next-window)))))
+    (with-selected-window (or window-to-use (selected-window))
+      (hyperspec-lookup symbol-name))))
+
 (define-key slime-editing-map (kbd "C-c r") 'slime-restart-inferior-lisp)
 (define-key slime-editing-map (kbd "C-c q") 'slime-quit)
-(define-key slime-editing-map (kbd "C-c C-d C-s") 'slime-hyperspec-lookup)
+(define-key slime-editing-map (kbd "C-c C-d C-s") 'hyperspec-lookup-other-window)
+
 
 ;; (defun create-lisp-image (systems file)
 ;;   "Create a core Lisp image with SYSTEMS loaded on it.  Save the image at FILE path."
