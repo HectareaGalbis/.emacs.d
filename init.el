@@ -7,8 +7,9 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("3199be8536de4a8300eaf9ce6d864a35aa802088c0925e944e2b74a574c68fd0" "a0415d8fc6aeec455376f0cbcc1bee5f8c408295d1c2b9a1336db6947b89dd98" default))
+ '(ispell-dictionary nil)
  '(package-selected-packages
-   '(exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+   '(projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
  '(undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -18,29 +19,33 @@
  )
 
 
-;; ------ Initial frame maximized ------
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+;; ------ Starting up emacs ------
+(defun initial-setup ()
+  (setq inhibit-startup-message t)                             ; Disable startup message
+  (setq initial-scratch-message nil)                           ; Disable initial scratch message
+  (scroll-bar-mode -1)                                         ; Disable scrollbar
+  (horizontal-scroll-bar-mode -1)                              ; Disable scrollbar
+  (tool-bar-mode -1)                                           ; Disable the toolbar
+  (tooltip-mode -1)                                            ; Disable tooltips
+  (menu-bar-mode -1)                                           ; Disable menu bar                          
+  (set-fringe-mode 10)                                         ; Give some breathing room
+  (add-to-list 'initial-frame-alist '(fullscreen . maximized)) ; Initialize emacs maximized
+  (setq frame-resize-pixelwise t)                              ; Adjust to window correctly
+  (delete-selection-mode 1)                                    ; Follow the convention of modern editors
+  (setq-default indent-tabs-mode nil)                          ; Prevents extraneous tabs
+  (set-face-attribute 'default nil :height 120)                ; Make font scale a bit larger
+  (setq browse-url-browser-function 'eww-browse-url)           ; Set the the default url browser
+  )
+
+(initial-setup)
 
 
-;; ------ Emacs editor changes ------
-(setq inhibit-startup-message t)                             ; Disable startup message
-(menu-bar-mode -1)                                           ; Disable the menu bar
-(scroll-bar-mode -1)                                         ; Disable visible scrollbar
-(tool-bar-mode -1)                                           ; Disable the toolbar
-(tooltip-mode -1)                                            ; Disable tooltips
-(set-fringe-mode 10)                                         ; Give some breathing room
-(switch-to-buffer "new-file" nil t)                          ; The initial buffer should be an empty buffer
-(add-to-list 'initial-frame-alist '(fullscreen . maximized)) ; Initialize emacs maximized
-(setq frame-resize-pixelwise t)
-(setq indent-tabs-mode nil)
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
-(delete-selection-mode 1)
-(global-set-key (kbd "C-c d") 'delete-pair)
-(set-face-attribute 'default nil :height 100)
-(global-set-key (kbd "M-<right>") 'enlarge-window-horizontally)
-(global-set-key (kbd "M-<left>") 'shrink-window-horizontally)
-(setq browse-url-browser-function 'eww-browse-url)           ; Set the the default url browser
+;; ------ Record mode ------
+(defun record-mode-on ()
+  (set-face-attribute 'default nil :height 140))
+
+(defun record-mode-off ()
+  (set-face-attribute 'default nil :height 120))
 
 
 ;; ----- Emacs backup and autosave files -----
@@ -50,22 +55,41 @@
       auto-save-file-name-transforms `((".*" ,(expand-file-name "tmp/auto-saves/" user-emacs-directory) t))) ; Put autosave files (ie #foo#) in ~/.emacs.d/ (I think)
 
 
-;; ------ Scrolling ------
+
+;; ------ Global keybindings ------
+(global-set-key (kbd "C-c d") 'delete-pair)
+
+
+;; ------ Scrolling and window resizing------
 (setq mouse-wheel-scroll-amount '(2 ((shift) . 5) ((control) . nil)))
 (setq mouse-wheel-progressive-speed nil)
 
 (defun custom-scroll-up ()
-  "Scroll up 3 lines."
+  "Scroll up 2 lines."
   (interactive)
-  (scroll-up 3))
+  (scroll-up 2))
 
 (defun custom-scroll-down ()
-  "Scroll down 3 lines."
+  "Scroll down 2 lines."
   (interactive)
-  (scroll-down 3))
+  (scroll-down 2))
+
+(defun fast-scroll-up ()
+  "Scroll up 5 lines."
+  (interactive)
+  (scroll-up 5))
+
+(defun fast-scroll-down ()
+  "Scroll down 5 lines."
+  (interactive)
+  (scroll-down 5))
 
 (global-set-key (kbd "<M-up>") 'custom-scroll-down)
 (global-set-key (kbd "<M-down>") 'custom-scroll-up)
+(global-set-key (kbd "<M-S-up>") 'fast-scroll-down)
+(global-set-key (kbd "<M-S-down>") 'fast-scroll-up)
+(global-set-key (kbd "M-<right>") 'enlarge-window-horizontally)
+(global-set-key (kbd "M-<left>") 'shrink-window-horizontally)
 
 
 ;; ----- Melpa -----
@@ -88,20 +112,17 @@
 ;; ----- Theme -----
 (use-package modus-themes
   :init
-  ;; Add all your customizations prior to loading the themes
   (setq modus-themes-italic-constructs t
         modus-themes-bold-constructs nil
         modus-themes-region '(bg-only no-extend))
   :bind ("<f5>" . modus-themes-toggle))
 (load-theme 'modus-vivendi)
 
+
 ;; ------- Doom modeline -------
 (use-package doom-modeline
   :init (doom-modeline-mode 1))
 
-
-;; ----- cl-lib -----
-(require 'cl-lib)
 
 ;; ----- thing at point -----
 (require 'thingatpt)
@@ -110,10 +131,7 @@
 ;; ----- Slime -----
 (use-package slime
   :init
-  (setq slime-contribs                     '(slime-fancy)
-        slime-complete-symbol-function     'slime-fuzzy-complete-symbol
-        slime-net-coding-system            'utf-8-unix
-        slime-lisp-implementations         '((sbcl  ("/usr/bin/sbcl")))))
+  (setq slime-lisp-implementations         '((sbcl  ("/usr/bin/sbcl")))))
 
 (defun slime-frame ()
   "Init slime in a new frame."
@@ -144,23 +162,32 @@
 (define-key slime-editing-map (kbd "C-c C-d C-s") 'hyperspec-lookup-other-window)
 
 
-;; (defun create-lisp-image (systems file)
-;;   "Create a core Lisp image with SYSTEMS loaded on it.  Save the image at FILE path."
-;;   (interactive "MWrite the systems to be loaded in the image:\nFWrite the path where to store the image:")
-;;   (let* ((system-names (split-string systems))
-;; 	 (eval-forms (apply 'concat (mapcar (lambda (name)
-;; 						(format " --eval \"(asdf:load-system :%s)\" " name))
-;; 					    system-names)))
-;; 	 (save-form (format " --eval \"(sb-ext:save-lisp-and-die #P\\\"%s\\\")\" " file))
-;; 	 (command (concat "sbcl " eval-forms save-form)))
-;;     (async-shell-command command)))
+(defun create-lisp-image (systems file)
+  "Create a core Lisp image with SYSTEMS loaded on it.  Save the image at FILE path."
+  (interactive "MWrite the systems to be loaded in the image:\nFWrite the path where to store the image:")
+  (let* ((system-names (split-string systems))
+	 (eval-forms (apply 'concat (mapcar (lambda (name)
+						(format " --eval \"(asdf:load-system :%s)\" " name))
+					    system-names)))
+	 (save-form (format " --eval \"(sb-ext:save-lisp-and-die #P\\\"%s\\\")\" " file))
+	 (command (concat "sbcl " eval-forms save-form)))
+    (async-shell-command command)))
 
-;; (defun slime-from-image (image)
-;;   "Initiate slime with a given core Lisp IMAGE."
-;;   (interactive "fWrite the path where the image is stored:")
-;;   (let* ((core-form (format " --core %s " image))
-;; 	 (command (concat "sbcl " core-form)))
-;;     (slime command)))
+(defun slime-create-executable (system file)
+  "Create a core Lisp image with SYSTEMS loaded on it.  Save the image at FILE path."
+  (interactive "MWrite the systems to be loaded in the image:\nFWrite the path where to store the image:")
+  (let* ((system-names (split-string systems))
+	 (eval-form (format " --eval \"(asdf:load-system :%s)\" " system))
+	 (save-form (format " --eval \"(sb-ext:save-lisp-and-die #P\\\"%s\\\" :toplevel #'main :executable t)\" " file))
+	 (command (concat "sbcl " eval-forms save-form)))
+    (async-shell-command command)))
+
+(defun slime-from-image (image)
+  "Initiate slime with a given core Lisp IMAGE."
+  (interactive "fWrite the path where the image is stored:")
+  (let* ((core-form (format " --core %s " image))
+	 (command (concat "sbcl " core-form)))
+    (slime command)))
 
 
 ;; ----- Undo tree -----
@@ -204,11 +231,6 @@
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 
-;; ----- Flycheck -----
-(use-package flycheck
-  :init (global-flycheck-mode t))
-
-
 ;; ------- Which key mode -------
 (use-package which-key
   :init (setq which-key-idle-delay 3.0)
@@ -238,7 +260,9 @@
 
 ;; ------ Ivy rich ------
 (use-package ivy-rich
-  :init (ivy-rich-mode 1))
+  :config
+  (ivy-rich-mode 1)
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
 
 
 ;; ------ Counsel ------
@@ -278,327 +302,13 @@
   ([remap describe-key] . helpful-key))
 
 
-;; ----- Custom project manager -----
-(defvar project-regex-marks '("\\.git$"))
-(defvar project-search-for-marks-from '("~/quicklisp/local-projects"
-					"~/GitHub"))
-(defvar initial-project-directories '())
-(defvar project-directories nil)
-(defvar project-file-regex '("\\.h$"
-			     "\\.c$"
-			     "\\.hpp$"
-			     "\\.cpp$"
-			     "\\.lisp$"
-			     "\\.asd$"
-			     "\\.asd$"
-			     "\\.md$"
-			     "\\.el$"
-			     "\\.emacs$"))
-(defvar project-cache-file "~/.emacs.d/project-files-cache")
-
-(defmacro measure-time (&rest body)
-  (let ((time (make-symbol "time"))
-	(result (make-symbol "result")))
-    `(let ((,time (current-time)))
-       (let ((result (progn
-		       ,@body)))
-	 (list (time-to-seconds (time-subtract (current-time) ,time)) result)))))
-
-(defun read-projects-cache ()
-  (let ((file-buffer (find-file-noselect project-cache-file :nowarn t)))
-    (prog1
-	(if (equal (buffer-size file-buffer) 0)
-	    nil
-	  (read file-buffer))
-      (kill-buffer file-buffer))))
-
-(defun print-projects-cache (assoc-directories)
-  (let ((cache (find-file-noselect project-cache-file)))
-    (with-current-buffer cache
-      (erase-buffer)
-      (print assoc-directories cache)
-      (save-buffer)
-      (kill-buffer))))
-
-(defun get-cache-data-project-files (dir assoc-directories)
-  (let ((found-files nil)
-	(rest-directories assoc-directories))
-    (while (and (not found-files) (not (null rest-directories)))
-      (let ((current-directory (caar rest-directories)))
-	(when (equal current-directory dir)
-	  (setq found-files (cadar rest-directories)))
-	(setq rest-directories (cdr rest-directories))))
-    found-files))
-
-(defun add-cache-data-project-files (dir files assoc-directories)
-  (if (null assoc-directories)
-      (list (list dir files))
-    (let ((current-project (car assoc-directories)))
-      (if (equal dir (car current-project))
-	  (cons (list dir files) (cdr assoc-directories))
-	(cons current-project (add-directory-files dir files (cdr assoc-directories)))))))
-
-(defun remove-cache-data-project-files (dir assoc-directories)
-  (if (null assoc-directories)
-      nil
-    (let ((current-project (car assoc-directories)))
-      (if (equal dir (car current-project))
-	  (cdr assoc-directories)
-	(cons current-project (remove-project-assoc dir (cdr assoc-directories)))))))
-
-(defun add-cache-project-files (dir files)
-  (let* ((old-data (read-projects-cache))
-	 (new-data (add-cache-data-project-files dir files old-data)))
-    (print-projects-cache new-data)))
-
-(defun delete-cache-project-files (dir)
-  (let* ((old-data (read-projects-cache))
-	 (new-data (remove-cache-data-project-files dir old-data)))
-    (print-projects-cache new-data)))
-
-(defun project-search-marks ()
-  (let ((all-marked-projects nil))
-    (dolist (dir project-search-for-marks-from all-marked-projects)
-      (let ((marked-projects (apply #'append (mapcar (lambda (regex-mark)
-						       (mapcar #'file-name-directory (directory-files-recursively dir regex-mark t)))
-						     project-regex-marks))))
-	(setq all-marked-projects (append marked-projects all-marked-projects))))))
-
-(defun priorize-project-directory (dir)
-  (setq project-directories (cons dir (remove dir project-directories))))
-
-(defun update-project-directories ()
-  (setq project-directories (append initial-project-directories (project-search-marks))))
-
-(defun get-files-recursively (dir pat &optional abs)
-  "Return the list of files under the directory DIR whose name matches PAT.
-If ABS is non-nil, the path will be absolute, otherwise relative."
-  (let (files)
-    (cl-labels ((aux (dir path rel-dir)
-                     (let ((cur-dir (expand-file-name rel-dir dir)))
-                       (dolist (name (directory-files cur-dir nil nil t))
-			 (unless (member name '("." ".."))
-                           (let ((fn (expand-file-name name cur-dir))
-				 (rel-name (if (string= "" rel-dir)
-					       name
-                                             (concat rel-dir "/" name))))
-                             (cond
-                              ((file-directory-p fn)
-                               (aux dir pat rel-name))
-                              ((string-match pat name)
-                               (push (if abs
-					 (expand-file-name rel-name dir)
-				       rel-name)
-				     files)))))))))
-      (aux dir pat "")
-      files)))
-
-(defun get-project-files (dir &optional abs no-cache)
-  (let ((cached-files (if no-cache
-			  nil
-			(get-cache-data-project-files dir (read-projects-cache)))))
-    (if cached-files
-	cached-files
-      (let* ((combined-regex (let ((current-regex (car project-file-regex)))
-			       (dolist (regex (cdr project-file-regex) current-regex)
-				 (setq current-regex (concat current-regex "\\|" regex)))))
-	     (time-and-result (measure-time (get-files-recursively dir combined-regex)))
-	     (time (car time-and-result))
-	     (files (cadr time-and-result)))
-	(when (> time 1.0)
-	  (add-cache-project-files dir files))
-	files))))
-
-(defun project-parent-directory (file)
-  (if (equal file "/")
-      nil
-      (file-name-directory (directory-file-name file))))
-
-(defun get-current-project ()
-  (let ((file (buffer-file-name)))
-    (when file
-      (setq file (expand-file-name file))
-      (let ((parent-dir (project-parent-directory file))
-	    (dir-found nil)
-	    (directories (mapcar (lambda (dir)
-				   (expand-file-name (file-name-as-directory dir)))
-				 project-directories)))
-	(while (and (not dir-found) parent-dir)
-	  (setq dir-found (car (member parent-dir directories)))
-	  (setq parent-dir (project-parent-directory parent-dir)))
-	dir-found))))
-
-(defun select-project-file-no-cache (&optional dir)
-  (interactive)
-  (select-project-file dir t))
-
-(defun get-cached-projects ()
-  (interactive)
-  (mapcar #'car (read-projects-cache)))
-
-(defun clear-project-cache ()
-  (interactive)
-  (ivy-read "Select a project to clear its cache: " (get-cached-projects)
-	    :action (lambda (dir)
-		      (delete-cache-project-files dir))
-	    :require-match t))
-
-(defun select-project-file (&optional dir no-cache)
-  (interactive)
-  (unless dir
-    (setq dir (get-current-project)))
-  (if dir
-      (ivy-read "Select a file: " (get-project-files dir nil no-cache)
-		:action (lambda (rel-path)
-			  (find-file (expand-file-name rel-path dir)))
-		:require-match nil)
-    (select-project-and-file)))
-
-(defun select-project ()
-  (interactive)
-  (ivy-read "Select a project: " project-directories
-	    :action (lambda (dir)
-		      (priorize-project-directory dir)
-		      dir)
-	    :require-match t))
-
-(defun select-project-and-file ()
-  (interactive)
-  (ivy-read "Select a project: " project-directories
-	    :action (lambda (dir)
-		      (priorize-project-directory dir)
-		      (select-project-file dir))
-	    :require-match t))
-
-(update-project-directories)
-(global-set-key (kbd "C-c p p") 'select-project-and-file)
-(global-set-key (kbd "C-c p f") 'select-project-file)
-
-
-;; ----- word at near files -----
-(defun parent-directory (dir &optional times)
-  (unless times
-    (setq times 2))
-  (let ((current-dir dir))
-    (while (and (> times 0) (directory-file-name (file-name-directory (directory-file-name current-dir))))
-      (setq current-dir (directory-file-name (file-name-directory (directory-file-name current-dir))))
-      (setq times (1- times)))
-    current-dir))
-
-(defun files-with-thing (thing up-levels)
-  (let ((dir (parent-directory (buffer-file-name) up-levels)))
-    (let* ((file-list nil)
-	   (combined-regex (let ((current-regex (car project-file-regex)))
-			     (dolist (regex (cdr project-file-regex) current-regex)
-			       (setq current-regex (concat current-regex "\\|" regex)))))
-	   (project-files (directory-files-recursively dir combined-regex))
-	   (total-files (length project-files))
-	   (processed-files 0))
-      (dolist (file project-files file-list)
-	(with-temp-buffer
-	  (insert-file-contents file nil nil nil t)
-	  (goto-char (point-max))
-	  (let ((next-pos (word-search-backward thing nil t)))
-	    (while next-pos
-	      (let ((line (thing-at-point 'line)))
-		(setq file-list (cons
-				 (format "%-10d | %s | %s"
-					 next-pos
-					 (let* ((thing-length (length thing))
-						(init-pos (string-match (format ".\\{,%d\\}%s" (/ (- 100 thing-length) 2) thing) line)))
-					   (seq-take (concat (seq-drop (seq-take line (1- (length line))) init-pos) (make-string 100 32)) 100))
-					 file)
-				    file-list)))
-	      (setq next-pos (word-search-backward thing nil t)))))
-	(setq processed-files (1+ processed-files))
-	(message "%d%%" (truncate (* 100.0 (/ (float processed-files) total-files))))))))
-
-(defvar initial-window nil)
-(defvar initial-buffer nil)
-(defvar initial-position nil)
-
-(defun save-initial-place ()
-  (setq initial-window (get-buffer-window))
-  (setq initial-buffer (current-buffer))
-  (setq initial-position (point)))
-
-(defun restore-initial-place ()
-  (when (and initial-buffer initial-position)
-    (switch-to-buffer initial-buffer)
-    (goto-char initial-position)))
-
-(defun read-position (str)
-  (string-to-number (seq-take str 10)))
-
-(defun read-file (str)
-  (let ((digits (seq-position str 32)))
-    (seq-drop str (+ (max digits 10) 106))))
-
-(defun close-last-visited-file (file closep thing)
-  (when file
-    (with-current-buffer (get-file-buffer file)
-      (hi-lock-unface-buffer thing)
-      (when closep
-	(kill-buffer)))))
-
-(defun goto-word-at-file (pos file thing)
-  (with-selected-window initial-window
-    (let ((enable-local-variables nil))
-      (find-file file))
-    (goto-char pos)
-    (hi-lock-face-buffer thing 'hi-yellow)))
-
-(defun select-files-with-thing-at-point (up-levels)
-  (interactive "p")
-  (unless up-levels
-    (setq up-levels 2))
-  (unless (> up-levels 0)
-    (setq up-levels 1))
-  (let ((thing (thing-at-point 'word))
-	(line (thing-at-point 'line)))
-    (when (not thing)
-      (user-error "No word at point"))
-    (let ((current-point (car (bounds-of-thing-at-point 'word)))
-	  (current-file (buffer-file-name))
-	  (files-with-thing (files-with-thing thing up-levels)))
-      (if files-with-thing
-	  (progn
-	    (save-initial-place)
-	    (let ((option-selected nil)
-		  (last-visited-file nil)
-		  (close-after-leave nil))
-	      (ivy-read "Select a file where thing is found: " files-with-thing
-			:action (lambda (entry)
-				  (setq option-selected t)
-				  (select-window initial-window)
-				  (let* ((word-file (read-file entry))
-					 (word-position (read-position entry)))
-				    (switch-to-buffer (find-file word-file))
-				    (goto-char word-position)))
-			:update-fn (lambda ()
-				     (let ((entry (ivy-state-current ivy-last)))
-				       (when (and entry (> (length entry) 0))
-					 (let* ((word-file (read-file entry))
-						(word-position (read-position entry)))
-					   (when (not (equal word-file last-visited-file))
-					     (close-last-visited-file last-visited-file close-after-leave thing)
-					     (setq last-visited-file word-file)
-					     (setq close-after-leave (not (get-file-buffer word-file))))
-					   (goto-word-at-file word-position word-file thing)))))
-			:preselect (format "%-10d | %s | %s"
-					   current-point
-					   (let* ((thing-length (length thing))
-						  (init-pos (string-match (format ".\\{,%d\\}%s" (/ (- 100 thing-length) 2) thing) line)))
-					     (seq-take (concat (seq-drop (seq-take line (1- (length line))) init-pos) (make-string 100 32)) 100))
-					   current-file)
-			:unwind (lambda ()
-				  (close-last-visited-file last-visited-file close-after-leave thing)
-				  (when (not option-selected)
-				    (restore-initial-place)))
-			:require-match t)))
-	(message "Thing not found in any file")))))
-
-(global-set-key (kbd "C-c p .") 'select-files-with-thing-at-point)
+;; ------ projectile ------
+(use-package projectile
+  :init
+  (projectile-mode +1)
+  :bind (:map projectile-mode-map
+              ("s-p" . projectile-command-map)
+              ("C-c p" . projectile-command-map)))
 
 
 ;; ------- Multiple cursors -------
@@ -606,6 +316,12 @@ If ABS is non-nil, the path will be absolute, otherwise relative."
 (global-set-key (kbd "C-S-c") 'mc/edit-lines)
 (define-key mc/keymap (kbd "<return>") nil)
 (global-set-key (kbd "C-S-<mouse-1>") 'mc/add-cursor-on-click)
+
+
+;; ------ org-bullets ------
+(add-to-list 'load-path "~/.emacs.d/org-bullets/")
+(require 'org-bullets)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
 
 ;; ----- Modern C++ font -----

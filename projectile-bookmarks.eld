@@ -1,0 +1,1 @@
+("~/.emacs.d/" "~/quicklisp/local-projects/more-cffi/" "~/quicklisp/local-projects/adp/")
