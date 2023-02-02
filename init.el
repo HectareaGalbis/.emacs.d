@@ -149,11 +149,19 @@
   (let ((display-buffer-alist '(("\\*inferior-lisp\\*" display-buffer-pop-up-frame (nil)))))
     (slime)))
 
+(defun slime-remote ()
+  (interactive)
+  (shell-command "ssh -M -S ~/slime-tunnel -o \"ExitOnForwardFailure yes\" -L4005:localhost:4005 -fN root@134.122.82.19")
+  (slime-connect "localhost" 4005))
+
 (defun slime-quit ()
   "Terminate inferior Lisp process and kill the buffer *inferior lisp*."
   (interactive)
-  (slime-quit-lisp)
-  (kill-buffer "*inferior lisp*"))
+  (if (get-buffer "*inferior-lisp*")
+      (slime-quit-lisp)
+    (slime-disconnect)
+    (shell-command "ssh -S ~/slime-tunnel -O exit root@134.122.82.19"))
+  (message "Connection closed."))
 
 (defun hyperspec-lookup-other-window (symbol-name)
   "Another wrapper for hyperspec-lookup"

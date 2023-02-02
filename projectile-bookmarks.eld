@@ -1,1 +1,1 @@
-("~/.emacs.d/" "~/quicklisp/local-projects/more-cffi/" "~/quicklisp/local-projects/adp/")
+("~/.emacs.d/" "~/quicklisp/local-projects/more-cffi/" "~/quicklisp/local-projects/adp/" "~/books/")
