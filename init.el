@@ -9,7 +9,7 @@
    '("3199be8536de4a8300eaf9ce6d864a35aa802088c0925e944e2b74a574c68fd0" "a0415d8fc6aeec455376f0cbcc1bee5f8c408295d1c2b9a1336db6947b89dd98" default))
  '(ispell-dictionary nil)
  '(package-selected-packages
-   '(toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+   '(all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
  '(undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -17,7 +17,12 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(fixed-pitch ((t (:family "Fira Code Retina" :height 160))))
+ '(org-block ((t (:inherit fixed-pitch))))
+ '(org-code ((t (:inherit (shadow fixed-pitch)))))
+ '(org-document-info ((t (:foreground "dark orange"))))
+ '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
  '(org-document-title ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif" :height 2.0 :underline nil))))
+ '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
  '(org-level-1 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif" :height 1.75))))
  '(org-level-2 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif" :height 1.5))))
  '(org-level-3 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif" :height 1.25))))
@@ -26,6 +31,13 @@
  '(org-level-6 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif"))))
  '(org-level-7 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif"))))
  '(org-level-8 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif"))))
+ '(org-link ((t (:foreground "royal blue" :underline t))))
+ '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+ '(org-property-value ((t (:inherit fixed-pitch))) t)
+ '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+ '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
+ '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+ '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
  '(variable-pitch ((t (:family "ETBembo" :height 180 :weight thin)))))
 
 
@@ -137,6 +149,26 @@
 ;; ----- thing at point -----
 (require 'thingatpt)
 
+
+;; ----- all-the-icons ------
+(use-package all-the-icons
+  :if (display-graphic-p))
+
+
+;; ------ dired ------
+(use-package dired
+  :ensure nil
+  :custom
+  ((dired-listing-switches "-agho --group-directories-first")
+   (delete-by-moving-to-trash t)))
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (define-key dired-mode-map "H" 'dired-hide-dotfiles-mode))
 
 ;; ----- Slime -----
 (use-package slime
@@ -276,6 +308,11 @@
   (ivy-mode 1))
 
 
+;; ------ all-the-icons-ivy-rich ------
+(use-package all-the-icons-ivy-rich
+  :init (all-the-icons-ivy-rich-mode 1))
+
+
 ;; ------ Ivy rich ------
 (use-package ivy-rich
   :config
@@ -288,6 +325,7 @@
   :bind (("M-x" . counsel-M-x)
 	 ("C-x b" . counsel-ibuffer)
 	 ("C-x C-f" . counsel-find-file)
+         ("C-x d" . counsel-dired)
 	 :map minibuffer-local-map
 	 ("C-r" . 'counsel-minibuffer-history))
   :config
