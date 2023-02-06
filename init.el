@@ -9,7 +9,7 @@
    '("3199be8536de4a8300eaf9ce6d864a35aa802088c0925e944e2b74a574c68fd0" "a0415d8fc6aeec455376f0cbcc1bee5f8c408295d1c2b9a1336db6947b89dd98" default))
  '(ispell-dictionary nil)
  '(package-selected-packages
-   '(all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+   '(writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
  '(undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -160,7 +160,8 @@
   :ensure nil
   :custom
   ((dired-listing-switches "-agho --group-directories-first")
-   (delete-by-moving-to-trash t)))
+   (delete-by-moving-to-trash t)
+   (dired-dwim-target t)))
 
 (use-package all-the-icons-dired
   :hook (dired-mode . all-the-icons-dired-mode))
@@ -277,7 +278,7 @@
 (column-number-mode)
 (global-display-line-numbers-mode t)
 
-(dolist (mode '(eshell-mode-hook)) ; Indicate in which modes we don't want this mode
+(dolist (mode '(eshell-mode-hook org-mode-hook)) ; Indicate in which modes we don't want this mode
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 
@@ -414,7 +415,7 @@
  '(variable-pitch ((t (:family "ETBembo" :height 120 :weight thin))))
  '(fixed-pitch ((t ( :family "Fira Code Retina" :height 100)))))
 
-(add-hook 'org-mode-hook 'variable-pitch-mode)
+;;(add-hook 'org-mode-hook 'variable-pitch-mode)
 (add-hook 'org-mode-hook 'visual-line-mode)
 (add-hook 'org-mode-hook 'org-indent-mode)
 
@@ -434,10 +435,107 @@
  '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
 
 
+;; ------ ox-publish ------
+(require 'ox-publish)
+
+(defun org-publish-forced (project)
+  "Publish PROJECT but forced."
+  (interactive
+   (list (assoc (completing-read "Publish project: "
+				 org-publish-project-alist nil t)
+		org-publish-project-alist)))
+  (org-publish project t))
+
+(setq user-full-name "Héctor Galbis Sanchis")
+(setq user-mail-address "hectometrocuadrado@gmail.com")
+(setq org-export-default-language "es")
+(setq org-html-metadata-timestamp-format "%d-%m-%Y")
+(setq org-export-html-date-format-string "%d-%m-%Y")
+(setq org-html-link-up "http://lispylambda.es")
+(setq org-html-link-home "http://lispylambda.es")
+
+(setq org-publish-project-alist
+      (list
+       (list "main"
+             :base-directory "~/lispylambda/"
+             :base-extension "org"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/"
+             :publishing-function 'org-html-publish-to-html
+             :html-head "<link rel=\"stylesheet\" href=\"/css/simple.css\" type=\"text/css\"/>"
+             :section-numbers nil
+             :with-toc nil
+             :html-postamble nil)
+
+       (list "posts"
+             :recursive t
+             :base-directory "~/lispylambda/posts/"
+             :base-extension "org"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/posts/"
+             :publishing-function 'org-html-publish-to-html
+             :time-stamp-file t
+             :html-head "<link rel=\"stylesheet\" href=\"/css/simple.css\" type=\"text/css\"/>"
+             :html-postamble (format "<p><a href=\"%s\">UP</a> | <a href=\"%s\">HOME</a></p><p></p><p>Autor: %s <%s></p><p>Última edición: %s</p>"
+                                     org-html-link-up
+                                     org-html-link-home
+                                     "%a" "%e" "%C")
+             :with-toc nil
+             :section-numbers nil
+             :auto-sitemap t
+             :sitemap-filename "posts-sitemap.org"
+             :sitemap-title ""
+             :sitemap-sort-files 'anti-chronologically
+             :sitemap-format-entry (lambda (file style project)
+                                     (format "(%s) [[file:%s][%s]]"
+                                             (org-format-time-string org-export-html-date-format-string
+                                                                     (org-publish-find-date file project))
+                                             file
+                                             (org-publish-find-title file project))))
+
+       (list "css"
+             :base-directory "~/lispylambda/css/"
+             :base-extension "css\\|el"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/css/"
+             :publishing-function 'org-publish-attachment)
+
+       ;; ("images"
+       ;;  :base-directory "~/images/"
+       ;;  :base-extension "jpg\\|gif\\|png"
+       ;;  :publishing-directory "/ssh:user@host:~/html/images/"
+       ;;  :publishing-function org-publish-attachment)
+
+       ;; ("other"
+       ;;  :base-directory "~/other/"
+       ;;  :base-extension "css\\|el"
+       ;;  :publishing-directory "/ssh:user@host:~/html/other/"
+       ;;  :publishing-function org-publish-attachment)
+       (list "lispylambda"
+             :components '("posts" "main" "css"))))
+
+
+;; ------ visual-fill-column ------
+(use-package visual-fill-column
+  :config
+  (add-hook 'org-mode-hook 'visual-fill-column-mode)
+  (setq-default visual-fill-column-center-text t))
+
+
 ;; ------ toc-org ------
 (use-package toc-org
   :config
   (add-hook 'org-mode-hook 'toc-org-mode))
+
+
+;; ------ hunspell ------
+(setq ispell-program-name "hunspell")
+
+
+;; ------ langtool ------
+;;(setq langtool-language-tool-jar "/snap/languagetool/36/usr/bin/languagetool-commandline.jar")
+;;(use-package langtool)
+
+
+;; ------ flyspell ------
+(add-hook 'org-mode-hook 'flyspell-mode)
 
 
 ;; ----- Modern C++ font -----
