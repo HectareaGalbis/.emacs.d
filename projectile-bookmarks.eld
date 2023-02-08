@@ -1,1 +1,1 @@
-("~/lispylambda/" "~/.emacs.d/")
+("~/.emacs.d/" "~/lispylambda/")

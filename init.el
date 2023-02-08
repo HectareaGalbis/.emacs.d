@@ -378,6 +378,7 @@
 
 
 ;; ------ org-mode ------
+(require 'org)
 (setq org-hide-emphasis-markers t)
 (setq org-support-shift-select 'always)
 (setq org-startup-with-inline-images t)
