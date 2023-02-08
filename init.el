@@ -64,9 +64,11 @@
 
 ;; ------ Record mode ------
 (defun record-mode-on ()
-  (set-face-attribute 'default nil :height 140))
+  (interactive)
+  (set-face-attribute 'default nil :height 200))
 
 (defun record-mode-off ()
+  (interactive)
   (set-face-attribute 'default nil :height 120))
 
 
@@ -378,6 +380,13 @@
 ;; ------ org-mode ------
 (setq org-hide-emphasis-markers t)
 (setq org-support-shift-select 'always)
+(setq org-startup-with-inline-images t)
+(setq org-image-actual-width nil)
+
+(define-key org-mode-map (kbd "C-M-<up>") 'org-metaup)
+(define-key org-mode-map (kbd "M-<up>") 'custom-scroll-down)
+(define-key org-mode-map (kbd "C-M-<down>") 'org-metadown)
+(define-key org-mode-map (kbd "M-<down>") 'custom-scroll-up)
 
 (font-lock-add-keywords 'org-mode
                         '(("^ *\\([-]\\) "
@@ -417,7 +426,7 @@
 
 ;;(add-hook 'org-mode-hook 'variable-pitch-mode)
 (add-hook 'org-mode-hook 'visual-line-mode)
-(add-hook 'org-mode-hook 'org-indent-mode)
+;;(add-hook 'org-mode-hook 'org-indent-mode)
 
 (custom-theme-set-faces
  'user
@@ -679,3 +688,4 @@
   (interactive)
   (if (y-or-n-p "Do you really want to open the Unreal Engine 5 editor?")
       (async-shell-command ue5-editor)))
+(put 'upcase-region 'disabled nil)
