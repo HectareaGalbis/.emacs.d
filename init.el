@@ -8,8 +8,19 @@
  '(custom-safe-themes
    '("3199be8536de4a8300eaf9ce6d864a35aa802088c0925e944e2b74a574c68fd0" "a0415d8fc6aeec455376f0cbcc1bee5f8c408295d1c2b9a1336db6947b89dd98" default))
  '(ispell-dictionary nil)
+ '(org-export-default-language "es")
+ '(org-fontify-emphasized-text t)
+ '(org-hide-emphasis-markers t)
+ '(org-html-link-home "http://lispylambda.es")
+ '(org-html-link-up "http://lispylambda.es")
+ '(org-html-metadata-timestamp-format "%d-%m-%Y")
+ '(org-image-actual-width nil)
+ '(org-link-from-user-regexp "\\<hector@HectareaPC\\>\\|\\<Hector\\>")
+ '(org-link-translation-function 'toc-org-unhrefify)
+ '(org-startup-with-inline-images t)
+ '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+   '(htmlize writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
  '(undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -422,10 +433,10 @@
 
 (custom-theme-set-faces
  'user
- '(variable-pitch ((t (:family "ETBembo" :height 120 :weight thin))))
- '(fixed-pitch ((t ( :family "Fira Code Retina" :height 100)))))
+ '(variable-pitch ((t (:family "ETBembo" :height 150 :weight thin))))
+ '(fixed-pitch ((t (:family "Fira Code Retina" :height 120)))))
 
-;;(add-hook 'org-mode-hook 'variable-pitch-mode)
+(add-hook 'org-mode-hook 'variable-pitch-mode)
 (add-hook 'org-mode-hook 'visual-line-mode)
 ;;(add-hook 'org-mode-hook 'org-indent-mode)
 
@@ -444,6 +455,18 @@
  '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
  '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
 
+(defun org-insert-literal-character (c)
+  "Insert a literal character at point."
+  (interactive "cWhat character?")
+  (insert ?\u200B c ?\u200B))
+
+(define-key org-mode-map (kbd "C-c i l") 'org-insert-literal-character)
+
+
+
+;; ------ htmlize ------
+(use-package htmlize)
+
 
 ;; ------ ox-publish ------
 (require 'ox-publish)
@@ -461,8 +484,8 @@
 (setq org-export-default-language "es")
 (setq org-html-metadata-timestamp-format "%d-%m-%Y")
 (setq org-export-html-date-format-string "%d-%m-%Y")
-(setq org-html-link-up "http://lispylambda.es")
-(setq org-html-link-home "http://lispylambda.es")
+(setq org-html-link-up "https://lispylambda.es")
+(setq org-html-link-home "https://lispylambda.es")
 
 (setq org-publish-project-alist
       (list
@@ -488,12 +511,12 @@
                                      org-html-link-up
                                      org-html-link-home
                                      "%a" "%e" "%C")
-             :with-toc nil
+             :with-toc 2
              :section-numbers nil
              :auto-sitemap t
              :sitemap-filename "posts-sitemap.org"
              :sitemap-title ""
-             :sitemap-sort-files 'anti-chronologically
+             :sitemap-sort-files 'chronologically
              :sitemap-format-entry (lambda (file style project)
                                      (format "(%s) [[file:%s][%s]]"
                                              (org-format-time-string org-export-html-date-format-string
@@ -501,26 +524,29 @@
                                              file
                                              (org-publish-find-title file project))))
 
+       (list "images"
+             :base-directory "~/lispylambda/images/"
+             :recursive t
+             :base-extension "png\\|gif\\|png"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/images/"
+             :publishing-function 'org-publish-attachment)
+
        (list "css"
              :base-directory "~/lispylambda/css/"
              :base-extension "css\\|el"
              :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/css/"
              :publishing-function 'org-publish-attachment)
 
-       ;; ("images"
-       ;;  :base-directory "~/images/"
-       ;;  :base-extension "jpg\\|gif\\|png"
-       ;;  :publishing-directory "/ssh:user@host:~/html/images/"
-       ;;  :publishing-function org-publish-attachment)
-
-       ;; ("other"
-       ;;  :base-directory "~/other/"
-       ;;  :base-extension "css\\|el"
-       ;;  :publishing-directory "/ssh:user@host:~/html/other/"
-       ;;  :publishing-function org-publish-attachment)
        (list "lispylambda"
-             :components '("posts" "main" "css"))))
+             :components '("css" "images" "posts" "main"))))
 
+(defun org-publish-update-lispylambda ()
+  "Update the posts of lispylambda site."
+  (interactive)
+  (org-publish-project "images")
+  (org-publish-project "css")
+  (org-publish-project "posts")
+  (org-publish-project "main" t))
 
 ;; ------ visual-fill-column ------
 (use-package visual-fill-column
