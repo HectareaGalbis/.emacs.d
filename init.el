@@ -525,14 +525,14 @@ block."
 		       (org-src-coderef-regexp coderef) "" expand nil nil 1))))
                  (body (if (equal lang "lisp")
                            (format "
-(macrolet ((functional-and-script ()
+(macrolet ((#1=#:functional-and-script ()
              (let ((output (gensym)) 
                    (result (gensym)))
                `(let* ((,output (make-array 10 :adjustable t :fill-pointer 0 :element-type 'character))
                        (,result (multiple-value-list (with-output-to-string (*standard-output* ,output)
                                                        %s))))
                   (format nil \"~a~&~{~s~^~&~}\" ,output ,result)))))
-  (functional-and-script))"
+  (#1#))"
                                    body)
                          body))
 		 (dir (cdr (assq :dir params)))
