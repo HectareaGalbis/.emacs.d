@@ -530,7 +530,8 @@ block."
                    (result (gensym)))
                `(let* ((,output (make-array 10 :adjustable t :fill-pointer 0 :element-type 'character))
                        (,result (multiple-value-list (with-output-to-string (*standard-output* ,output)
-                                                       %s))))
+                                                       %s
+                                                       ))))
                   (format nil \"~a~&~{~s~^~&~}\" ,output ,result)))))
   (#1#))"
                                    body)
