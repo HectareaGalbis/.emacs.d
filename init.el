@@ -460,7 +460,25 @@
   (interactive "cWhat character?")
   (insert ?\u200B c ?\u200B))
 
+(defun org-insert-lisp-src-block-with-results ()
+  (interactive)
+  (insert "#+begin_src lisp :exports both :eval never-export
+")
+  (save-excursion
+    (insert "
+#+end_src")))
+
+(defun org-insert-lisp-src-block ()
+  (interactive)
+  (insert "#+begin_src lisp
+")
+  (save-excursion
+    (insert "
+#+end_src")))
+
 (define-key org-mode-map (kbd "C-c i l") 'org-insert-literal-character)
+(define-key org-mode-map (kbd "C-c s r") 'org-insert-lisp-src-block-with-results)
+(define-key org-mode-map (kbd "C-c s s") 'org-insert-lisp-src-block)
 
 
 ;; ------ babel ------
@@ -634,11 +652,11 @@ block."
              :with-toc nil
              :html-postamble nil)
 
-       (list "posts"
+       (list "common-lisp"
              :recursive t
-             :base-directory "~/lispylambda/posts/"
+             :base-directory "~/lispylambda/posts/common-lisp/"
              :base-extension "org"
-             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/posts/"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/posts/common-lisp/"
              :publishing-function 'org-html-publish-to-html
              :time-stamp-file t
              :html-head "<link rel=\"stylesheet\" href=\"/css/simple.css\" type=\"text/css\"/>"
@@ -649,7 +667,32 @@ block."
              :with-toc 2
              :section-numbers nil
              :auto-sitemap t
-             :sitemap-filename "posts-sitemap.org"
+             :sitemap-filename "common-lisp-sitemap.org"
+             :sitemap-title ""
+             :sitemap-sort-files 'chronologically
+             :sitemap-format-entry (lambda (file style project)
+                                     (format "(%s) [[file:%s][%s]]"
+                                             (org-format-time-string org-export-html-date-format-string
+                                                                     (org-publish-find-date file project))
+                                             file
+                                             (org-publish-find-title file project))))
+       
+       (list "UnrealEngine"
+             :recursive t
+             :base-directory "~/lispylambda/posts/UnrealEngine/"
+             :base-extension "org"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/posts/UnrealEngine/"
+             :publishing-function 'org-html-publish-to-html
+             :time-stamp-file t
+             :html-head "<link rel=\"stylesheet\" href=\"/css/simple.css\" type=\"text/css\"/>"
+             :html-postamble (format "<p><a href=\"%s\">UP</a> | <a href=\"%s\">HOME</a></p><p></p><p>Autor: %s <%s></p><p>Última edición: %s</p>"
+                                     org-html-link-up
+                                     org-html-link-home
+                                     "%a" "%e" "%C")
+             :with-toc 2
+             :section-numbers nil
+             :auto-sitemap t
+             :sitemap-filename "UnrealEngine-sitemap.org"
              :sitemap-title ""
              :sitemap-sort-files 'chronologically
              :sitemap-format-entry (lambda (file style project)
@@ -673,14 +716,15 @@ block."
              :publishing-function 'org-publish-attachment)
 
        (list "lispylambda"
-             :components '("css" "images" "posts" "main"))))
+             :components '("css" "images" "common-lisp" "UnrealEngine" "main"))))
 
 (defun org-publish-update-lispylambda ()
   "Update the posts of lispylambda site."
   (interactive)
   (org-publish-project "images")
   (org-publish-project "css")
-  (org-publish-project "posts")
+  (org-publish-project "common-lisp")
+  (org-publish-project "UnrealEngine")
   (org-publish-project "main" t))
 
 ;; ------ visual-fill-column ------
