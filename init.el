@@ -154,6 +154,15 @@
 (load-theme 'modus-vivendi)
 
 
+;; ----- eaf -----  HAY QUE ESPERAR A QUE SALGA LA VERSION 28.1 DE EMACS EN LOS REPOSIORIOS DE UBUNTU
+;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+;; (require 'eaf)
+;; (require 'eaf-browser)
+;; (require 'eaf-pdf-viewer)
+;; (require 'eaf-org-previewer)
+
+
+
 ;; ------- Doom modeline -------
 (use-package doom-modeline
   :init (doom-modeline-mode 1))
@@ -716,7 +725,8 @@ block."
              :publishing-function 'org-publish-attachment)
 
        (list "lispylambda"
-             :components '("css" "images" "common-lisp" "UnrealEngine" "main"))))
+             :components '("css" "images" "common-lisp" ;; "UnrealEngine"
+                           "main"))))
 
 (defun org-publish-update-lispylambda ()
   "Update the posts of lispylambda site."
@@ -724,8 +734,9 @@ block."
   (org-publish-project "images")
   (org-publish-project "css")
   (org-publish-project "common-lisp")
-  (org-publish-project "UnrealEngine")
+  ;;(org-publish-project "UnrealEngine")
   (org-publish-project "main" t))
+
 
 ;; ------ visual-fill-column ------
 (use-package visual-fill-column

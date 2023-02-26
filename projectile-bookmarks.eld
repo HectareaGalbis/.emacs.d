@@ -1,1 +1,1 @@
-("~/lispylambda/" "~/.emacs.d/" "~/quicklisp/local-projects/adp/")
+("~/.emacs.d/" "~/.emacs.d/site-lisp/emacs-application-framework/" "~/quicklisp/local-projects/more-cffi/" "~/lispylambda/" "~/quicklisp/local-projects/adp/")
