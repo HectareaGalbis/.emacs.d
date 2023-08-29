@@ -7,36 +7,80 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("3199be8536de4a8300eaf9ce6d864a35aa802088c0925e944e2b74a574c68fd0" "a0415d8fc6aeec455376f0cbcc1bee5f8c408295d1c2b9a1336db6947b89dd98" default))
+ '(ispell-dictionary nil)
+ '(org-export-default-language "es")
+ '(org-fontify-emphasized-text t)
+ '(org-hide-emphasis-markers t)
+ '(org-html-link-home "http://lispylambda.es")
+ '(org-html-link-up "http://lispylambda.es")
+ '(org-html-metadata-timestamp-format "%d-%m-%Y")
+ '(org-image-actual-width nil)
+ '(org-link-from-user-regexp "\\<hector@HectareaPC\\>\\|\\<Hector\\>")
+ '(org-link-translation-function 'toc-org-unhrefify)
+ '(org-startup-with-inline-images t)
+ '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+   '(htmlize writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
  '(undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(fixed-pitch ((t (:family "Fira Code Retina" :height 160))))
+ '(org-block ((t (:inherit fixed-pitch))))
+ '(org-code ((t (:inherit (shadow fixed-pitch)))))
+ '(org-document-info ((t (:foreground "dark orange"))))
+ '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+ '(org-document-title ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif" :height 2.0 :underline nil))))
+ '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
+ '(org-level-1 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif" :height 1.75))))
+ '(org-level-2 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif" :height 1.5))))
+ '(org-level-3 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif" :height 1.25))))
+ '(org-level-4 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif" :height 1.1))))
+ '(org-level-5 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif"))))
+ '(org-level-6 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif"))))
+ '(org-level-7 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif"))))
+ '(org-level-8 ((t (:inherit default :weight bold :foreground "#ffffff" :family "Sans Serif"))))
+ '(org-link ((t (:foreground "royal blue" :underline t))))
+ '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+ '(org-property-value ((t (:inherit fixed-pitch))) t)
+ '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+ '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
+ '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+ '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
+ '(variable-pitch ((t (:family "ETBembo" :height 180 :weight thin)))))
 
 
-;; ------ Initial frame maximized ------
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+;; ------ Starting up emacs ------
+(defun initial-setup ()
+  (setq inhibit-startup-message t)                             ; Disable startup message
+  (setq initial-scratch-message nil)                           ; Disable initial scratch message
+  (scroll-bar-mode -1)                                         ; Disable scrollbar
+  (horizontal-scroll-bar-mode -1)                              ; Disable scrollbar
+  (tool-bar-mode -1)                                           ; Disable the toolbar
+  (tooltip-mode -1)                                            ; Disable tooltips
+  (menu-bar-mode -1)                                           ; Disable menu bar                          
+  (set-fringe-mode 10)                                         ; Give some breathing room
+  (add-to-list 'initial-frame-alist '(fullscreen . maximized)) ; Initialize emacs maximized
+  (setq frame-resize-pixelwise t)                              ; Adjust to window correctly
+  (delete-selection-mode 1)                                    ; Follow the convention of modern editors
+  (setq-default indent-tabs-mode nil)                          ; Prevents extraneous tabs
+  (set-face-attribute 'default nil :height 120)                ; Make font scale a bit larger
+  (setq browse-url-browser-function 'eww-browse-url)           ; Set the the default url browser
+  )
+
+(initial-setup)
 
 
-;; ------ Emacs editor changes ------
-(setq inhibit-startup-message t)                             ; Disable startup message
-(menu-bar-mode -1)                                           ; Disable the menu bar
-(scroll-bar-mode -1)                                         ; Disable visible scrollbar
-(tool-bar-mode -1)                                           ; Disable the toolbar
-(tooltip-mode -1)                                            ; Disable tooltips
-(set-fringe-mode 10)                                         ; Give some breathing room
-(switch-to-buffer "new-file" nil t)                          ; The initial buffer should be an empty buffer
-(add-to-list 'initial-frame-alist '(fullscreen . maximized)) ; Initialize emacs maximized
-(setq frame-resize-pixelwise t)
-(setq indent-tabs-mode nil)
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
-(delete-selection-mode 1)
-(global-set-key (kbd "C-c d") 'delete-pair)
+;; ------ Record mode ------
+(defun record-mode-on ()
+  (interactive)
+  (set-face-attribute 'default nil :height 200))
+
+(defun record-mode-off ()
+  (interactive)
+  (set-face-attribute 'default nil :height 120))
 
 
 ;; ----- Emacs backup and autosave files -----
@@ -46,22 +90,41 @@
       auto-save-file-name-transforms `((".*" ,(expand-file-name "tmp/auto-saves/" user-emacs-directory) t))) ; Put autosave files (ie #foo#) in ~/.emacs.d/ (I think)
 
 
-;; ------ Scrolling ------
+
+;; ------ Global keybindings ------
+(global-set-key (kbd "C-c d") 'delete-pair)
+
+
+;; ------ Scrolling and window resizing------
 (setq mouse-wheel-scroll-amount '(2 ((shift) . 5) ((control) . nil)))
 (setq mouse-wheel-progressive-speed nil)
 
 (defun custom-scroll-up ()
-  "Scroll up 3 lines."
+  "Scroll up 2 lines."
   (interactive)
-  (scroll-up 3))
+  (scroll-up 2))
 
 (defun custom-scroll-down ()
-  "Scroll down 3 lines."
+  "Scroll down 2 lines."
   (interactive)
-  (scroll-down 3))
+  (scroll-down 2))
+
+(defun fast-scroll-up ()
+  "Scroll up 5 lines."
+  (interactive)
+  (scroll-up 5))
+
+(defun fast-scroll-down ()
+  "Scroll down 5 lines."
+  (interactive)
+  (scroll-down 5))
 
 (global-set-key (kbd "<M-up>") 'custom-scroll-down)
 (global-set-key (kbd "<M-down>") 'custom-scroll-up)
+(global-set-key (kbd "<M-S-up>") 'fast-scroll-down)
+(global-set-key (kbd "<M-S-down>") 'fast-scroll-up)
+(global-set-key (kbd "M-<right>") 'enlarge-window-horizontally)
+(global-set-key (kbd "M-<left>") 'shrink-window-horizontally)
 
 
 ;; ----- Melpa -----
@@ -81,22 +144,21 @@
 (setq use-package-always-ensure t) ; Makes a package to be installed if it isn't
 
 
-;; ----- EXWM -----
-(use-package exwm
-  :config
-  (require 'exwm-config)
-  (exwm-config-default))
-
-
 ;; ----- Theme -----
-(use-package modus-themes
-  :init
-  ;; Add all your customizations prior to loading the themes
-  (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs nil
-        modus-themes-region '(bg-only no-extend))
-  :bind ("<f5>" . modus-themes-toggle))
-(load-theme 'modus-vivendi)
+(use-package vscode-dark-plus-theme
+  :ensure t
+  :config
+  (load-theme 'vscode-dark-plus t))
+
+
+;; ----- eaf -----  HAY QUE ESPERAR A QUE SALGA LA VERSION 28.1 DE EMACS EN LOS REPOSIORIOS DE UBUNTU
+;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+;; (require 'eaf)
+;; (require 'eaf-browser)
+;; (require 'eaf-pdf-viewer)
+;; (require 'eaf-org-previewer)
+
+
 
 ;; ------- Doom modeline -------
 (use-package doom-modeline
@@ -107,13 +169,31 @@
 (require 'thingatpt)
 
 
+;; ----- all-the-icons ------
+(use-package all-the-icons
+  :if (display-graphic-p))
+
+
+;; ------ dired ------
+(use-package dired
+  :ensure nil
+  :custom
+  ((dired-listing-switches "-agho --group-directories-first")
+   (delete-by-moving-to-trash t)
+   (dired-dwim-target t)))
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (define-key dired-mode-map "H" 'dired-hide-dotfiles-mode))
+
 ;; ----- Slime -----
 (use-package slime
   :init
-  (setq slime-contribs                     '(slime-fancy)
-        slime-complete-symbol-function     'slime-fuzzy-complete-symbol
-        slime-net-coding-system            'utf-8-unix
-        slime-lisp-implementations         '((sbcl  ("/usr/bin/sbcl")))))
+  (setq slime-lisp-implementations         '((sbcl  ("/usr/bin/sbcl")))))
 
 (defun slime-frame ()
   "Init slime in a new frame."
@@ -121,33 +201,63 @@
   (let ((display-buffer-alist '(("\\*inferior-lisp\\*" display-buffer-pop-up-frame (nil)))))
     (slime)))
 
+(defun slime-remote ()
+  (interactive)
+  (shell-command "ssh -M -S ~/slime-tunnel -o \"ExitOnForwardFailure yes\" -L4005:localhost:4005 -fN root@134.122.82.19")
+  (slime-connect "localhost" 4005))
+
 (defun slime-quit ()
   "Terminate inferior Lisp process and kill the buffer *inferior lisp*."
   (interactive)
-  (slime-quit-lisp)
-  (kill-buffer "*inferior lisp*"))
+  (if (get-buffer "*inferior-lisp*")
+      (slime-quit-lisp)
+    (slime-disconnect)
+    (shell-command "ssh -S ~/slime-tunnel -O exit root@134.122.82.19"))
+  (message "Connection closed."))
+
+(defun hyperspec-lookup-other-window (symbol-name)
+  "Another wrapper for hyperspec-lookup"
+  (interactive (list (common-lisp-hyperspec-read-symbol-name
+                      (slime-symbol-at-point))))
+  (let ((window-to-use (or (get-buffer-window "*eww*")
+			   (if (and (eq browse-url-browser-function 'eww-browse-url)
+				    (= (count-windows) 1))
+			       (split-window-right)
+			     (next-window)))))
+    (with-selected-window (or window-to-use (selected-window))
+      (hyperspec-lookup symbol-name))))
 
 (define-key slime-editing-map (kbd "C-c r") 'slime-restart-inferior-lisp)
 (define-key slime-editing-map (kbd "C-c q") 'slime-quit)
-(define-key slime-editing-map (kbd "C-c C-d C-s") 'slime-hyperspec-lookup)
+(define-key slime-editing-map (kbd "C-c C-d C-s") 'hyperspec-lookup-other-window)
 
-;; (defun create-lisp-image (systems file)
-;;   "Create a core Lisp image with SYSTEMS loaded on it.  Save the image at FILE path."
-;;   (interactive "MWrite the systems to be loaded in the image:\nFWrite the path where to store the image:")
-;;   (let* ((system-names (split-string systems))
-;; 	 (eval-forms (apply 'concat (mapcar (lambda (name)
-;; 						(format " --eval \"(asdf:load-system :%s)\" " name))
-;; 					    system-names)))
-;; 	 (save-form (format " --eval \"(sb-ext:save-lisp-and-die #P\\\"%s\\\")\" " file))
-;; 	 (command (concat "sbcl " eval-forms save-form)))
-;;     (async-shell-command command)))
 
-;; (defun slime-from-image (image)
-;;   "Initiate slime with a given core Lisp IMAGE."
-;;   (interactive "fWrite the path where the image is stored:")
-;;   (let* ((core-form (format " --core %s " image))
-;; 	 (command (concat "sbcl " core-form)))
-;;     (slime command)))
+(defun create-lisp-image (systems file)
+  "Create a core Lisp image with SYSTEMS loaded on it.  Save the image at FILE path."
+  (interactive "MWrite the systems to be loaded in the image:\nFWrite the path where to store the image:")
+  (let* ((system-names (split-string systems))
+	 (eval-forms (apply 'concat (mapcar (lambda (name)
+						(format " --eval \"(asdf:load-system :%s)\" " name))
+					    system-names)))
+	 (save-form (format " --eval \"(sb-ext:save-lisp-and-die #P\\\"%s\\\")\" " file))
+	 (command (concat "sbcl " eval-forms save-form)))
+    (async-shell-command command)))
+
+(defun slime-create-executable (system file)
+  "Create a core Lisp image with SYSTEMS loaded on it.  Save the image at FILE path."
+  (interactive "MWrite the systems to be loaded in the image:\nFWrite the path where to store the image:")
+  (let* ((system-names (split-string systems))
+	 (eval-form (format " --eval \"(asdf:load-system :%s)\" " system))
+	 (save-form (format " --eval \"(sb-ext:save-lisp-and-die #P\\\"%s\\\" :toplevel #'main :executable t)\" " file))
+	 (command (concat "sbcl " eval-forms save-form)))
+    (async-shell-command command)))
+
+(defun slime-from-image (image)
+  "Initiate slime with a given core Lisp IMAGE."
+  (interactive "fWrite the path where the image is stored:")
+  (let* ((core-form (format " --core %s " image))
+	 (command (concat "sbcl " core-form)))
+    (slime command)))
 
 
 ;; ----- Undo tree -----
@@ -187,13 +297,8 @@
 (column-number-mode)
 (global-display-line-numbers-mode t)
 
-(dolist (mode '(eshell-mode-hook)) ; Indicate in which modes we don't want this mode
+(dolist (mode '(eshell-mode-hook org-mode-hook)) ; Indicate in which modes we don't want this mode
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-
-;; ----- Flycheck -----
-(use-package flycheck
-  :init (global-flycheck-mode t))
 
 
 ;; ------- Which key mode -------
@@ -223,9 +328,16 @@
   (ivy-mode 1))
 
 
+;; ------ all-the-icons-ivy-rich ------
+(use-package all-the-icons-ivy-rich
+  :init (all-the-icons-ivy-rich-mode 1))
+
+
 ;; ------ Ivy rich ------
 (use-package ivy-rich
-  :init (ivy-rich-mode 1))
+  :config
+  (ivy-rich-mode 1)
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
 
 
 ;; ------ Counsel ------
@@ -233,6 +345,7 @@
   :bind (("M-x" . counsel-M-x)
 	 ("C-x b" . counsel-ibuffer)
 	 ("C-x C-f" . counsel-find-file)
+         ("C-x d" . counsel-dired)
 	 :map minibuffer-local-map
 	 ("C-r" . 'counsel-minibuffer-history))
   :config
@@ -265,300 +378,13 @@
   ([remap describe-key] . helpful-key))
 
 
-;; ----- Custom project manager -----
-(defvar project-regex-marks '("\\.git$"))
-(defvar project-search-for-marks-from '("~/quicklisp/local-projects"
-					"~/GitHub"))
-(defvar initial-project-directories '("/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/PChaos/ProjectChaos/Source"
-				      "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/ProjectRouter/ProjectRouter/Source"
-				      "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/Sandbox/Source"
-				      "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/UnrealEngine-4.27/Engine/Source"))
-(defvar project-directories nil)
-(defvar project-file-regex '("\\.h$"
-			     "\\.c$"
-			     "\\.hpp$"
-			     "\\.cpp$"
-			     "\\.lisp$"
-			     "\\.asd$"
-			     "\\.asd$"
-			     "\\.md$"
-			     "\\.el$"
-			     "\\.emacs$"))
-(defvar project-cache-file "~/.emacs.d/project-files-cache")
-
-(defmacro measure-time (&rest body)
-  (let ((time (make-symbol "time"))
-	(result (make-symbol "result")))
-    `(let ((,time (current-time)))
-       (let ((result (progn
-		       ,@body)))
-	 (list (time-to-seconds (time-subtract (current-time) ,time)) result)))))
-
-(defun read-projects-cache ()
-  (let ((file-buffer (find-file-noselect project-cache-file :nowarn t)))
-    (prog1
-	(if (equal (buffer-size file-buffer) 0)
-	    nil
-	  (read file-buffer))
-      (kill-buffer file-buffer))))
-
-(defun print-projects-cache (assoc-directories)
-  (let ((cache (find-file-noselect project-cache-file)))
-    (with-current-buffer cache
-      (erase-buffer)
-      (print assoc-directories cache)
-      (save-buffer)
-      (kill-buffer))))
-
-(defun get-cache-data-project-files (dir assoc-directories)
-  (let ((found-files nil)
-	(rest-directories assoc-directories))
-    (while (and (not found-files) (not (null rest-directories)))
-      (let ((current-directory (caar rest-directories)))
-	(when (equal current-directory dir)
-	  (setq found-files (cadar rest-directories)))
-	(setq rest-directories (cdr rest-directories))))
-    found-files))
-
-(defun add-cache-data-project-files (dir files assoc-directories)
-  (if (null assoc-directories)
-      (list (list dir files))
-    (let ((current-project (car assoc-directories)))
-      (if (equal dir (car current-project))
-	  (cons (list dir files) (cdr assoc-directories))
-	(cons current-project (add-directory-files dir files (cdr assoc-directories)))))))
-
-(defun remove-cache-data-project-files (dir assoc-directories)
-  (if (null assoc-directories)
-      nil
-    (let ((current-project (car assoc-directories)))
-      (if (equal dir (car current-project))
-	  (cdr assoc-directories)
-	(cons current-project (remove-project-assoc dir (cdr assoc-directories)))))))
-
-(defun add-cache-project-files (dir files)
-  (let* ((old-data (read-projects-cache))
-	 (new-data (add-cache-data-project-files dir files old-data)))
-    (print-projects-cache new-data)))
-
-(defun delete-cache-project-files (dir)
-  (let* ((old-data (read-projects-cache))
-	 (new-data (remove-cache-data-project-files dir old-data)))
-    (print-projects-cache new-data)))
-
-(defun project-search-marks ()
-  (let ((all-marked-projects nil))
-    (dolist (dir project-search-for-marks-from all-marked-projects)
-      (let ((marked-projects (apply #'append (mapcar (lambda (regex-mark)
-						       (mapcar #'file-name-directory (directory-files-recursively dir regex-mark t)))
-						     project-regex-marks))))
-	(setq all-marked-projects (append marked-projects all-marked-projects))))))
-
-(defun priorize-project-directory (dir)
-  (setq project-directories (cons dir (remove dir project-directories))))
-
-(defun update-project-directories ()
-  (setq project-directories (append initial-project-directories (project-search-marks))))
-
-(defun get-project-files (dir &optional no-cache)
-  (let ((cached-files (if no-cache
-			  nil
-			(get-cache-data-project-files dir (read-projects-cache)))))
-    (if cached-files
-	cached-files
-      (let* ((combined-regex (let ((current-regex (car project-file-regex)))
-			       (dolist (regex (cdr project-file-regex) current-regex)
-				 (setq current-regex (concat current-regex "\\|" regex)))))
-	     (time-and-result (measure-time (directory-files-recursively dir combined-regex)))
-	     (time (car time-and-result))
-	     (files (cadr time-and-result)))
-	(when (> time 1.0)
-	  (add-cache-project-files dir files))
-	files))))
-
-(defun get-current-project ()
-  (let ((file (buffer-file-name)))
-    (when file
-      (setq file (abbreviate-file-name file))
-      (let ((dir-found nil)
-	    (directories project-directories))
-	(while (and (not dir-found) (not (null directories)))
-	  (let ((dir (car directories)))
-	    (when (member file (get-project-files dir))
-	      (setq dir-found dir))
-	    (setq directories (cdr directories))))
-	dir-found))))
-
-(defun select-project-file-no-cache (&optional dir)
-  (interactive)
-  (select-project-file dir t))
-
-(defun get-cached-projects ()
-  (interactive)
-  (mapcar #'car (read-projects-cache)))
-
-(defun clear-project-cache ()
-  (interactive)
-  (ivy-read "Select a project to clear its cache: " (get-cached-projects)
-	    :action (lambda (dir)
-		      (delete-cache-project-files dir))
-	    :require-match t))
-
-(defun select-project-file (&optional dir no-cache)
-  (interactive)
-  (unless dir
-    (setq dir (get-current-project)))
-  (if dir
-      (ivy-read "Select a file: " (get-project-files dir no-cache)
-		:action #'find-file
-		:require-match nil)
-    (select-project)))
-
-(defun select-project ()
-  (interactive)
-  (ivy-read "Select a project: " project-directories
-	    :action (lambda (dir)
-		      (priorize-project-directory dir)
-		      dir)
-	    :require-match t))
-
-(defun select-project-and-file ()
-  (interactive)
-  (ivy-read "Select a project: " project-directories
-	    :action (lambda (dir)
-		      (priorize-project-directory dir)
-		      (select-project-file dir))
-	    :require-match t))
-
-(update-project-directories)
-(global-set-key (kbd "C-c p p") 'select-project-and-file)
-(global-set-key (kbd "C-c p f") 'select-project-file)
-
-
-;; ----- word at near files -----
-(defun parent-directory (dir &optional times)
-  (unless times
-    (setq times 2))
-  (let ((current-dir dir))
-    (while (and (> times 0) (directory-file-name (file-name-directory (directory-file-name current-dir))))
-      (setq current-dir (directory-file-name (file-name-directory (directory-file-name current-dir))))
-      (setq times (1- times)))
-    current-dir))
-
-(defun files-with-thing (thing up-levels)
-  (let ((dir (parent-directory (buffer-file-name) up-levels)))
-    (let* ((file-list nil)
-	   (combined-regex (let ((current-regex (car project-file-regex)))
-			     (dolist (regex (cdr project-file-regex) current-regex)
-			       (setq current-regex (concat current-regex "\\|" regex)))))
-	   (project-files (directory-files-recursively dir combined-regex))
-	   (total-files (length project-files))
-	   (processed-files 0))
-      (dolist (file project-files file-list)
-	(with-temp-buffer
-	  (insert-file-contents file nil nil nil t)
-	  (goto-char (point-max))
-	  (let ((next-pos (word-search-backward thing nil t)))
-	    (while next-pos
-	      (let ((line (thing-at-point 'line)))
-		(setq file-list (cons
-				 (format "%-10d | %s | %s"
-					 next-pos
-					 (let* ((thing-length (length thing))
-						(init-pos (string-match (format ".\\{,%d\\}%s" (/ (- 100 thing-length) 2) thing) line)))
-					   (seq-take (concat (seq-drop (seq-take line (1- (length line))) init-pos) (make-string 100 32)) 100))
-					 file)
-				    file-list)))
-	      (setq next-pos (word-search-backward thing nil t)))))
-	(setq processed-files (1+ processed-files))
-	(message "%d%%" (truncate (* 100.0 (/ (float processed-files) total-files))))))))
-
-(defvar initial-window nil)
-(defvar initial-buffer nil)
-(defvar initial-position nil)
-
-(defun save-initial-place ()
-  (setq initial-window (get-buffer-window))
-  (setq initial-buffer (current-buffer))
-  (setq initial-position (point)))
-
-(defun restore-initial-place ()
-  (when (and initial-buffer initial-position)
-    (switch-to-buffer initial-buffer)
-    (goto-char initial-position)))
-
-(defun read-position (str)
-  (string-to-number (seq-take str 10)))
-
-(defun read-file (str)
-  (let ((digits (seq-position str 32)))
-    (seq-drop str (+ (max digits 10) 106))))
-
-(defun close-last-visited-file (file closep thing)
-  (when file
-    (with-current-buffer (get-file-buffer file)
-      (hi-lock-unface-buffer thing)
-      (when closep
-	(kill-buffer)))))
-
-(defun goto-word-at-file (pos file thing)
-  (with-selected-window initial-window
-    (let ((enable-local-variables nil))
-      (find-file file))
-    (goto-char pos)
-    (hi-lock-face-buffer thing 'hi-yellow)))
-
-(defun select-files-with-thing-at-point (up-levels)
-  (interactive "p")
-  (unless up-levels
-    (setq up-levels 2))
-  (unless (> up-levels 0)
-    (setq up-levels 1))
-  (let ((thing (thing-at-point 'word))
-	(line (thing-at-point 'line)))
-    (when (not thing)
-      (user-error "No word at point"))
-    (let ((current-point (car (bounds-of-thing-at-point 'word)))
-	  (current-file (buffer-file-name))
-	  (files-with-thing (files-with-thing thing up-levels)))
-      (if files-with-thing
-	  (progn
-	    (save-initial-place)
-	    (let ((option-selected nil)
-		  (last-visited-file nil)
-		  (close-after-leave nil))
-	      (ivy-read "Select a file where thing is found: " files-with-thing
-			:action (lambda (entry)
-				  (setq option-selected t)
-				  (select-window initial-window)
-				  (let* ((word-file (read-file entry))
-					 (word-position (read-position entry)))
-				    (switch-to-buffer (find-file word-file))
-				    (goto-char word-position)))
-			:update-fn (lambda ()
-				     (let ((entry (ivy-state-current ivy-last)))
-				       (when (and entry (> (length entry) 0))
-					 (let* ((word-file (read-file entry))
-						(word-position (read-position entry)))
-					   (when (not (equal word-file last-visited-file))
-					     (close-last-visited-file last-visited-file close-after-leave thing)
-					     (setq last-visited-file word-file)
-					     (setq close-after-leave (not (get-file-buffer word-file))))
-					   (goto-word-at-file word-position word-file thing)))))
-			:preselect (format "%-10d | %s | %s"
-					   current-point
-					   (let* ((thing-length (length thing))
-						  (init-pos (string-match (format ".\\{,%d\\}%s" (/ (- 100 thing-length) 2) thing) line)))
-					     (seq-take (concat (seq-drop (seq-take line (1- (length line))) init-pos) (make-string 100 32)) 100))
-					   current-file)
-			:unwind (lambda ()
-				  (close-last-visited-file last-visited-file close-after-leave thing)
-				  (when (not option-selected)
-				    (restore-initial-place)))
-			:require-match t)))
-	(message "Thing not found in any file")))))
-
-(global-set-key (kbd "C-c p .") 'select-files-with-thing-at-point)
+;; ------ projectile ------
+(use-package projectile
+  :init
+  (projectile-mode +1)
+  :bind (:map projectile-mode-map
+              ("s-p" . projectile-command-map)
+              ("C-c p" . projectile-command-map)))
 
 
 ;; ------- Multiple cursors -------
@@ -566,6 +392,373 @@
 (global-set-key (kbd "C-S-c") 'mc/edit-lines)
 (define-key mc/keymap (kbd "<return>") nil)
 (global-set-key (kbd "C-S-<mouse-1>") 'mc/add-cursor-on-click)
+
+
+;; ------ org-mode ------
+(require 'org)
+(setq org-hide-emphasis-markers t)
+(setq org-support-shift-select 'always)
+(setq org-startup-with-inline-images t)
+(setq org-image-actual-width nil)
+
+(define-key org-mode-map (kbd "C-M-<up>") 'org-metaup)
+(define-key org-mode-map (kbd "M-<up>") 'custom-scroll-down)
+(define-key org-mode-map (kbd "C-M-<down>") 'org-metadown)
+(define-key org-mode-map (kbd "M-<down>") 'custom-scroll-up)
+
+(font-lock-add-keywords 'org-mode
+                        '(("^ *\\([-]\\) "
+                           (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))
+                          ("^\\*+ "
+                           (0
+                            (prog1 nil
+                              (put-text-property (match-beginning 0) (match-end 0)
+                                                 'invisible t))))))
+
+(let* ((variable-tuple
+        (cond ((x-list-fonts "ETBembo")         '(:font "ETBembo"))
+              ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
+              ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
+              ((x-list-fonts "Verdana")         '(:font "Verdana"))
+              ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
+              (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
+       (base-font-color     (face-foreground 'default nil 'default))
+       (headline           `(:inherit default :weight bold :foreground ,base-font-color)))
+
+  (custom-theme-set-faces
+   'user
+   `(org-level-8 ((t (,@headline ,@variable-tuple))))
+   `(org-level-7 ((t (,@headline ,@variable-tuple))))
+   `(org-level-6 ((t (,@headline ,@variable-tuple))))
+   `(org-level-5 ((t (,@headline ,@variable-tuple))))
+   `(org-level-4 ((t (,@headline ,@variable-tuple :height 1.1))))
+   `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.3))))
+   `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.5))))
+   `(org-level-1 ((t (,@headline ,@variable-tuple :height 2.0))))
+   `(org-document-title ((t (,@headline ,@variable-tuple :height 2.5 :underline nil))))))
+
+(custom-theme-set-faces
+ 'user
+ '(variable-pitch ((t (:family "ETBembo" :height 150 :weight thin))))
+ '(fixed-pitch ((t (:family "Fira Code Retina" :height 120)))))
+
+(add-hook 'org-mode-hook 'variable-pitch-mode)
+(add-hook 'org-mode-hook 'visual-line-mode)
+;;(add-hook 'org-mode-hook 'org-indent-mode)
+
+(custom-theme-set-faces
+ 'user
+ '(org-block ((t (:inherit fixed-pitch))))
+ '(org-code ((t (:inherit (shadow fixed-pitch)))))
+ '(org-document-info ((t (:foreground "dark orange"))))
+ '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+ '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
+ '(org-link ((t (:foreground "royal blue" :underline t))))
+ '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+ '(org-property-value ((t (:inherit fixed-pitch))) t)
+ '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+ '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
+ '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+ '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
+
+(defun org-insert-literal-character (c)
+  "Insert a literal character at point."
+  (interactive "cWhat character?")
+  (insert ?\u200B c ?\u200B))
+
+(defun org-insert-lisp-src-block-with-results ()
+  (interactive)
+  (insert "#+begin_src lisp :exports both :eval never-export
+")
+  (save-excursion
+    (insert "
+#+end_src")))
+
+(defun org-insert-lisp-src-block ()
+  (interactive)
+  (insert "#+begin_src lisp
+")
+  (save-excursion
+    (insert "
+#+end_src")))
+
+(define-key org-mode-map (kbd "C-c i l") 'org-insert-literal-character)
+(define-key org-mode-map (kbd "C-c s r") 'org-insert-lisp-src-block-with-results)
+(define-key org-mode-map (kbd "C-c s s") 'org-insert-lisp-src-block)
+
+
+;; ------ babel ------
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((lisp . t)))
+
+(defun org-babel-execute-src-block (&optional arg info params)
+  "Execute the current source code block.
+Insert the results of execution into the buffer.  Source code
+execution and the collection and formatting of results can be
+controlled through a variety of header arguments.
+
+With prefix argument ARG, force re-execution even if an existing
+result cached in the buffer would otherwise have been returned.
+
+Optionally supply a value for INFO in the form returned by
+`org-babel-get-src-block-info'.
+
+Optionally supply a value for PARAMS which will be merged with
+the header arguments specified at the front of the source code
+block."
+  (interactive)
+  (let* ((org-babel-current-src-block-location
+	  (or org-babel-current-src-block-location
+	      (nth 5 info)
+	      (org-babel-where-is-src-block-head)))
+	 (info (if info (copy-tree info) (org-babel-get-src-block-info))))
+    ;; Merge PARAMS with INFO before considering source block
+    ;; evaluation since both could disagree.
+    (cl-callf org-babel-merge-params (nth 2 info) params)
+    (when (org-babel-check-evaluate info)
+      (cl-callf org-babel-process-params (nth 2 info))
+      (let* ((params (nth 2 info))
+	     (cache (let ((c (cdr (assq :cache params))))
+		      (and (not arg) c (string= "yes" c))))
+	     (new-hash (and cache (org-babel-sha1-hash info :eval)))
+	     (old-hash (and cache (org-babel-current-result-hash)))
+	     (current-cache (and new-hash (equal new-hash old-hash))))
+	(cond
+	 (current-cache
+	  (save-excursion		;Return cached result.
+	    (goto-char (org-babel-where-is-src-block-result nil info))
+	    (forward-line)
+	    (skip-chars-forward " \t")
+	    (let ((result (org-babel-read-result)))
+	      (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
+	      result)))
+	 ((org-babel-confirm-evaluate info)
+	  (let* ((lang (nth 0 info))
+		 (result-params (cdr (assq :result-params params)))
+		 ;; Expand noweb references in BODY and remove any
+		 ;; coderef.
+		 (body
+		  (let ((coderef (nth 6 info))
+			(expand
+			 (if (org-babel-noweb-p params :eval)
+			     (org-babel-expand-noweb-references info)
+			   (nth 1 info))))
+		    (if (not coderef) expand
+		      (replace-regexp-in-string
+		       (org-src-coderef-regexp coderef) "" expand nil nil 1))))
+                 (body (if (equal lang "lisp")
+                           (format "
+(macrolet ((#1=#:functional-and-script ()
+             (let ((output (gensym)) 
+                   (result (gensym)))
+               `(let* ((,output (make-array 10 :adjustable t :fill-pointer 0 :element-type 'character))
+                       (,result (multiple-value-list (with-output-to-string (*standard-output* ,output)
+                                                       %s
+                                                       ))))
+                  (format nil \"~a~&~{~s~^~&~}\" ,output ,result)))))
+  (#1#))"
+                                   body)
+                         body))
+		 (dir (cdr (assq :dir params)))
+		 (mkdirp (cdr (assq :mkdirp params)))
+		 (default-directory
+		   (cond
+		    ((not dir) default-directory)
+		    ((member mkdirp '("no" "nil" nil))
+		     (file-name-as-directory (expand-file-name dir)))
+		    (t
+		     (let ((d (file-name-as-directory (expand-file-name dir))))
+		       (make-directory d 'parents)
+		       d))))
+		 (cmd (intern (concat "org-babel-execute:" lang)))
+		 result)
+	    (unless (fboundp cmd)
+	      (error "No org-babel-execute function for %s!" lang))
+	    (message "executing %s code block%s..."
+		     (capitalize lang)
+		     (let ((name (nth 4 info)))
+		       (if name (format " (%s)" name) "")))
+	    (if (member "none" result-params)
+		(progn (funcall cmd body params)
+		       (message "result silenced"))
+	      (setq result
+		    (let ((r (funcall cmd body params)))
+		      (if (and (eq (cdr (assq :result-type params)) 'value)
+			       (or (member "vector" result-params)
+				   (member "table" result-params))
+			       (not (listp r)))
+			  (list (list r))
+			r)))
+	      (let ((file (and (member "file" result-params)
+			       (cdr (assq :file params)))))
+		;; If non-empty result and :file then write to :file.
+		(when file
+		  ;; If `:results' are special types like `link' or
+		  ;; `graphics', don't write result to `:file'.  Only
+		  ;; insert a link to `:file'.
+		  (when (and result
+			     (not (or (member "link" result-params)
+				      (member "graphics" result-params))))
+		    (with-temp-file file
+		      (insert (org-babel-format-result
+			       result
+			       (cdr (assq :sep params))))))
+		  (setq result file))
+		;; Possibly perform post process provided its
+		;; appropriate.  Dynamically bind "*this*" to the
+		;; actual results of the block.
+		(let ((post (cdr (assq :post params))))
+		  (when post
+		    (let ((*this* (if (not file) result
+				    (org-babel-result-to-file
+				     file
+				     (let ((desc (assq :file-desc params)))
+				       (and desc (or (cdr desc) result)))))))
+		      (setq result (org-babel-ref-resolve post))
+		      (when file
+			(setq result-params (remove "file" result-params))))))
+		(org-babel-insert-result
+		 result result-params info new-hash lang)))
+	    (run-hooks 'org-babel-after-execute-hook)
+	    result)))))))
+
+;; ------ htmlize ------
+(use-package htmlize)
+
+
+;; ------ ox-publish ------
+(require 'ox-publish)
+
+(defun org-publish-forced (project)
+  "Publish PROJECT but forced."
+  (interactive
+   (list (assoc (completing-read "Publish project: "
+				 org-publish-project-alist nil t)
+		org-publish-project-alist)))
+  (org-publish project t))
+
+(setq user-full-name "Héctor Galbis Sanchis")
+(setq user-mail-address "hectometrocuadrado@gmail.com")
+(setq org-export-default-language "es")
+(setq org-html-metadata-timestamp-format "%d-%m-%Y")
+(setq org-export-html-date-format-string "%d-%m-%Y")
+(setq org-html-link-up "https://lispylambda.es")
+(setq org-html-link-home "https://lispylambda.es")
+
+(setq org-publish-project-alist
+      (list
+       (list "main"
+             :base-directory "~/lispylambda/"
+             :base-extension "org"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/"
+             :publishing-function 'org-html-publish-to-html
+             :html-head "<link rel=\"stylesheet\" href=\"/css/simple.css\" type=\"text/css\"/>"
+             :section-numbers nil
+             :with-toc nil
+             :html-postamble nil)
+
+       (list "common-lisp"
+             :recursive t
+             :base-directory "~/lispylambda/posts/common-lisp/"
+             :base-extension "org"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/posts/common-lisp/"
+             :publishing-function 'org-html-publish-to-html
+             :time-stamp-file t
+             :html-head "<link rel=\"stylesheet\" href=\"/css/simple.css\" type=\"text/css\"/>"
+             :html-postamble (format "<p><a href=\"%s\">UP</a> | <a href=\"%s\">HOME</a></p><p></p><p>Autor: %s <%s></p><p>Última edición: %s</p>"
+                                     org-html-link-up
+                                     org-html-link-home
+                                     "%a" "%e" "%C")
+             :with-toc 2
+             :section-numbers nil
+             :auto-sitemap t
+             :sitemap-filename "common-lisp-sitemap.org"
+             :sitemap-title ""
+             :sitemap-sort-files 'chronologically
+             :sitemap-format-entry (lambda (file style project)
+                                     (format "(%s) [[file:%s][%s]]"
+                                             (org-format-time-string org-export-html-date-format-string
+                                                                     (org-publish-find-date file project))
+                                             file
+                                             (org-publish-find-title file project))))
+       
+       (list "UnrealEngine"
+             :recursive t
+             :base-directory "~/lispylambda/posts/UnrealEngine/"
+             :base-extension "org"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/posts/UnrealEngine/"
+             :publishing-function 'org-html-publish-to-html
+             :time-stamp-file t
+             :html-head "<link rel=\"stylesheet\" href=\"/css/simple.css\" type=\"text/css\"/>"
+             :html-postamble (format "<p><a href=\"%s\">UP</a> | <a href=\"%s\">HOME</a></p><p></p><p>Autor: %s <%s></p><p>Última edición: %s</p>"
+                                     org-html-link-up
+                                     org-html-link-home
+                                     "%a" "%e" "%C")
+             :with-toc 2
+             :section-numbers nil
+             :auto-sitemap t
+             :sitemap-filename "UnrealEngine-sitemap.org"
+             :sitemap-title ""
+             :sitemap-sort-files 'chronologically
+             :sitemap-format-entry (lambda (file style project)
+                                     (format "(%s) [[file:%s][%s]]"
+                                             (org-format-time-string org-export-html-date-format-string
+                                                                     (org-publish-find-date file project))
+                                             file
+                                             (org-publish-find-title file project))))
+
+       (list "images"
+             :base-directory "~/lispylambda/images/"
+             :recursive t
+             :base-extension "png\\|gif\\|png"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/images/"
+             :publishing-function 'org-publish-attachment)
+
+       (list "css"
+             :base-directory "~/lispylambda/css/"
+             :base-extension "css\\|el"
+             :publishing-directory "/ssh:root@lispylambda.es:~/blog-site/css/"
+             :publishing-function 'org-publish-attachment)
+
+       (list "lispylambda"
+             :components '("css" "images" "common-lisp" ;; "UnrealEngine"
+                           "main"))))
+
+(defun org-publish-update-lispylambda ()
+  "Update the posts of lispylambda site."
+  (interactive)
+  (org-publish-project "images")
+  (org-publish-project "css")
+  (org-publish-project "common-lisp")
+  ;;(org-publish-project "UnrealEngine")
+  (org-publish-project "main" t))
+
+
+;; ------ visual-fill-column ------
+(use-package visual-fill-column
+  :config
+  (add-hook 'org-mode-hook 'visual-fill-column-mode)
+  (setq-default visual-fill-column-center-text t))
+
+
+;; ------ toc-org ------
+(use-package toc-org
+  :config
+  (add-hook 'org-mode-hook 'toc-org-mode))
+
+
+;; ------ hunspell ------
+(setq ispell-program-name "hunspell")
+
+
+;; ------ langtool ------
+;;(setq langtool-language-tool-jar "/snap/languagetool/36/usr/bin/languagetool-commandline.jar")
+;;(use-package langtool)
+
+
+;; ------ flyspell ------
+(add-hook 'org-mode-hook 'flyspell-mode)
 
 
 ;; ----- Modern C++ font -----
@@ -709,3 +902,4 @@
   (interactive)
   (if (y-or-n-p "Do you really want to open the Unreal Engine 5 editor?")
       (async-shell-command ue5-editor)))
+(put 'upcase-region 'disabled nil)

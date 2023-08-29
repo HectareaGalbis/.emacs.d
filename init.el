@@ -20,7 +20,7 @@
  '(org-startup-with-inline-images t)
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(htmlize writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+   '(vscode-dark-plus-theme htmlize writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
  '(undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -145,13 +145,10 @@
 
 
 ;; ----- Theme -----
-(use-package modus-themes
-  :init
-  (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs nil
-        modus-themes-region '(bg-only no-extend))
-  :bind ("<f5>" . modus-themes-toggle))
-(load-theme 'modus-vivendi)
+(use-package vscode-dark-plus-theme
+  :ensure t
+  :config
+  (load-theme 'vscode-dark-plus t))
 
 
 ;; ----- eaf -----  HAY QUE ESPERAR A QUE SALGA LA VERSION 28.1 DE EMACS EN LOS REPOSIORIOS DE UBUNTU
