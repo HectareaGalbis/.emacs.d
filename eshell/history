@@ -115,3 +115,4 @@ emacs emacs.desktop
 sudo emacs emacs.desktop
 gnome-session-quit 
 vivaldi
+ls

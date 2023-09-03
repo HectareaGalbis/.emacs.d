@@ -20,7 +20,7 @@
  '(org-startup-with-inline-images t)
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(htmlize writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+   '(slime-company company haskell-mode vscode-dark-plus-theme htmlize writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
  '(undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -68,31 +68,20 @@
   (setq-default indent-tabs-mode nil)                          ; Prevents extraneous tabs
   (set-face-attribute 'default nil :height 120)                ; Make font scale a bit larger
   (setq browse-url-browser-function 'eww-browse-url)           ; Set the the default url browser
-  )
+
+  ;; Global keybindings
+  (global-set-key (kbd "C-c d") 'delete-pair)
+  (global-set-key (kbd "C-+") 'text-scale-increase)
+  (global-set-key (kbd "C--") 'text-scale-decrease)
+  (global-unset-key (kbd "C-z")))
 
 (initial-setup)
-
-
-;; ------ Record mode ------
-(defun record-mode-on ()
-  (interactive)
-  (set-face-attribute 'default nil :height 200))
-
-(defun record-mode-off ()
-  (interactive)
-  (set-face-attribute 'default nil :height 120))
-
 
 ;; ----- Emacs backup and autosave files -----
 (setq backup-directory-alist `(("." . ,(expand-file-name "tmp/backups/" user-emacs-directory))))             ; Put backup files (ie foo~) in ~/.emacs.d/.
 (make-directory (expand-file-name "tmp/auto-saves/" user-emacs-directory) t)                                 ; create the autosave dir if necessary, since emacs won't.
 (setq auto-save-list-file-prefix (expand-file-name "tmp/auto-saves/sessions/" user-emacs-directory)
       auto-save-file-name-transforms `((".*" ,(expand-file-name "tmp/auto-saves/" user-emacs-directory) t))) ; Put autosave files (ie #foo#) in ~/.emacs.d/ (I think)
-
-
-
-;; ------ Global keybindings ------
-(global-set-key (kbd "C-c d") 'delete-pair)
 
 
 ;; ------ Scrolling and window resizing------
@@ -123,8 +112,6 @@
 (global-set-key (kbd "<M-down>") 'custom-scroll-up)
 (global-set-key (kbd "<M-S-up>") 'fast-scroll-down)
 (global-set-key (kbd "<M-S-down>") 'fast-scroll-up)
-(global-set-key (kbd "M-<right>") 'enlarge-window-horizontally)
-(global-set-key (kbd "M-<left>") 'shrink-window-horizontally)
 
 
 ;; ----- Melpa -----
@@ -151,18 +138,21 @@
   (load-theme 'vscode-dark-plus t))
 
 
-;; ----- eaf -----  HAY QUE ESPERAR A QUE SALGA LA VERSION 28.1 DE EMACS EN LOS REPOSIORIOS DE UBUNTU
-;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-;; (require 'eaf)
-;; (require 'eaf-browser)
-;; (require 'eaf-pdf-viewer)
-;; (require 'eaf-org-previewer)
-
-
-
-;; ------- Doom modeline -------
+;; ------ Doom modeline ------
 (use-package doom-modeline
   :init (doom-modeline-mode 1))
+
+
+;; ------ magit ------
+(use-package magit)
+
+
+;; ------ company ------
+(use-package company
+  :bind (:map company-active-map
+              ("<tab>" . company-complete-selection))
+  :config
+  (global-company-mode))
 
 
 ;; ----- thing at point -----
@@ -190,10 +180,13 @@
   :config
   (define-key dired-mode-map "H" 'dired-hide-dotfiles-mode))
 
+
 ;; ----- Slime -----
 (use-package slime
   :init
-  (setq slime-lisp-implementations         '((sbcl  ("/usr/bin/sbcl")))))
+  (setq slime-lisp-implementations         '((sbcl  ("/usr/bin/sbcl"))))
+  :config
+  (slime-setup '(slime-fancy slime-company)))
 
 (defun slime-frame ()
   "Init slime in a new frame."
@@ -229,6 +222,7 @@
 
 (define-key slime-editing-map (kbd "C-c r") 'slime-restart-inferior-lisp)
 (define-key slime-editing-map (kbd "C-c q") 'slime-quit)
+(define-key slime-editing-map (kbd "C-c e") 'slime-eval-buffer)
 (define-key slime-editing-map (kbd "C-c C-d C-s") 'hyperspec-lookup-other-window)
 
 
@@ -258,6 +252,13 @@
   (let* ((core-form (format " --core %s " image))
 	 (command (concat "sbcl " core-form)))
     (slime command)))
+
+
+;; ------ slime-company ------
+(use-package slime-company
+  :after (slime company)
+  :config
+  (setq slime-company-completion 'fuzzy))
 
 
 ;; ----- Undo tree -----
@@ -798,108 +799,3 @@ block."
 
 ;; ----- Shell -----
 (global-set-key (kbd "C-c t") 'shell)
-
-
-;; ----- UE4Editor -----
-(defvar ue4-projects '(("ProjectChaos" "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/PChaos/ProjectChaos")
-		       ("Sandbox" "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/Sandbox")
-		       ("ProjectRouter" "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/ProjectRouter/ProjectRouter")))
-(defvar ue4-editor "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/UnrealEngine-4.27/Engine/Binaries/Linux/UE4Editor")
-(defvar ue5-projects '(("LEVEL_UP_Project" "/home/hectarea/Unreal Projects/LEVEL_UP_Project")))
-(defvar ue5-editor "/media/hectarea/d7101242-e372-47ae-80ea-4bb601f1c53c/UnrealEngine/UnrealEngine5/Engine/Binaries/Linux/UnrealEditor-Cmd")
-
-
-(defun get-ue4-projects ()
-  (mapcar #'car ue4-projects))
-
-(defun get-ue4-project-directory (project)
-  (let ((project-found nil)
-	(rest-ue4-projects ue4-projects))
-    (while (and (not project-found) (not (null rest-ue4-projects)))
-      (let ((current-project (caar rest-ue4-projects)))
-	(when (equal current-project project)
-	  (setq project-found (cadar rest-ue4-projects)))
-	(setq rest-ue4-projects (cdr rest-ue4-projects))))
-    (directory-file-name project-found)))
-
-(defun ue4-compile-project ()
-  (interactive)
-  (ivy-read "Select UE4 project: " (get-ue4-projects)
-	    :require-match t
-	    :action (lambda (project)
-		      (if (y-or-n-p (concat "Do you really want to compile " project "?"))
-			  (let ((project-dir (get-ue4-project-directory project)))
-			    (unless project-dir
-			      (error "Project '%s' not found" project))
-			    (let* ((makefile (concat project-dir "/Makefile"))
-				   (command (concat "make -f" makefile " " project "Editor")))
-			      (async-shell-command command)))
-			(ue4-compile-project)))))
-
-(defun ue4-open-project ()
-  (interactive)
-  (ivy-read "Select UE4 project: " (get-ue4-projects)
-	    :require-match t
-	    :action (lambda (project)
-		      (if (y-or-n-p (concat "Do you really want to open " project "?"))
-			  (let ((project-dir (get-ue4-project-directory project)))
-			    (unless project-dir
-			      (error "Project '%s' not found" project))
-			    (let* ((uproject (concat project-dir "/" project ".uproject"))
-				   (command (concat ue4-editor " " uproject)))
-			      (async-shell-command command)))
-			(ue4-open-project)))))
-
-(defun ue4-run-editor ()
-  (interactive)
-  (if (y-or-n-p "Do you really want to open the Unreal Engine 4 editor?")
-      (async-shell-command ue4-editor)))
-
-
-(defun get-ue5-projects ()
-  (mapcar #'car ue5-projects))
-
-(defun get-ue5-project-directory (project)
-  (let ((project-found nil)
-	(rest-ue5-projects ue5-projects))
-    (while (and (not project-found) (not (null rest-ue5-projects)))
-      (let ((current-project (caar rest-ue5-projects)))
-	(when (equal current-project project)
-	  (setq project-found (cadar rest-ue5-projects)))
-	(setq rest-ue5-projects (cdr rest-ue5-projects))))
-    (directory-file-name project-found)))
-
-(defun ue5-compile-project ()
-  (interactive)
-  (ivy-read "Select UE5 project: " (get-ue5-projects)
-	    :require-match t
-	    :action (lambda (project)
-		      (if (y-or-n-p (concat "Do you really want to compile " project "?"))
-			  (let ((project-dir (get-ue5-project-directory project)))
-			    (unless project-dir
-			      (error "Project '%s' not found" project))
-			    (let* ((makefile (concat project-dir "/Makefile"))
-				   (command (concat "make -f" makefile " " project "Editor")))
-			      (async-shell-command command)))
-			(ue5-compile-project)))))
-
-(defun ue5-open-project ()
-  (interactive)
-  (ivy-read "Select UE5 project: " (get-ue5-projects)
-	    :require-match t
-	    :action (lambda (project)
-		      (if (y-or-n-p (concat "Do you really want to open " project "?"))
-			  (let ((project-dir (get-ue5-project-directory project)))
-			    (unless project-dir
-			      (error "Project '%s' not found" project))
-			    (let* ((uproject (concat "\"" project-dir "/" project ".uproject" "\""))
-				   (command (concat ue5-editor " " uproject)))
-			      (async-shell-command command)))
-			(ue5-open-project)))))
-
-
-(defun ue5-run-editor ()
-  (interactive)
-  (if (y-or-n-p "Do you really want to open the Unreal Engine 5 editor?")
-      (async-shell-command ue5-editor)))
-(put 'upcase-region 'disabled nil)
