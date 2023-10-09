@@ -8,6 +8,9 @@
  '(custom-safe-themes
    '("3199be8536de4a8300eaf9ce6d864a35aa802088c0925e944e2b74a574c68fd0" "a0415d8fc6aeec455376f0cbcc1bee5f8c408295d1c2b9a1336db6947b89dd98" default))
  '(ispell-dictionary nil)
+ '(markdown-command "pandoc" t)
+ '(markdown-link-space-sub-char "-")
+ '(markdown-wiki-link-search-subdirectories t)
  '(org-export-default-language "es")
  '(org-fontify-emphasized-text t)
  '(org-hide-emphasis-markers t)
@@ -20,7 +23,8 @@
  '(org-startup-with-inline-images t)
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(slime-company company haskell-mode vscode-dark-plus-theme htmlize writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+   '(scribble scribble-mode magit slime-company company haskell-mode vscode-dark-plus-theme htmlize writeroom visual-fill-column langtool all-the-icons-ivy all-the-icons-ivy-rich dired-hide-dotfiles dired-icon all-the-icons-dired dired-single toc-org org-bullets projectile-mode exwm dirtrack ivy slime avy markdown-mode flycheck-pkg-config undo-tree ivy-xref dumb-jump flycheck modern-cpp-font-lock auto-complete pdf-continuous-scroll-mode pdf-tools paredit parinfer-rust multiple-cursors cmake-mode which-key use-package spacemacs-theme solo-jazz-theme solarized-theme rainbow-delimiters projectile parinfer-rust-mode one-themes modus-themes ivy-rich helpful doom-themes doom-modeline counsel))
+ '(safe-local-variable-values '((Syntax . ANSI-Common-Lisp) (Base . 10)))
  '(undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree-history/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -28,6 +32,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(fixed-pitch ((t (:family "Fira Code Retina" :height 160))))
+ '(markdown-code-face ((t (:inherit fixed-pitch :family "Ubuntu Mono"))))
  '(org-block ((t (:inherit fixed-pitch))))
  '(org-code ((t (:inherit (shadow fixed-pitch)))))
  '(org-document-info ((t (:foreground "dark orange"))))
@@ -67,7 +72,7 @@
   (delete-selection-mode 1)                                    ; Follow the convention of modern editors
   (setq-default indent-tabs-mode nil)                          ; Prevents extraneous tabs
   (set-face-attribute 'default nil :height 120)                ; Make font scale a bit larger
-  (setq browse-url-browser-function 'eww-browse-url)           ; Set the the default url browser
+  ;; (setq browse-url-browser-function 'eww-browse-url)        ; Set the the default url browser
 
   ;; Global keybindings
   (global-set-key (kbd "C-c d") 'delete-pair)
@@ -220,7 +225,12 @@
     (with-selected-window (or window-to-use (selected-window))
       (hyperspec-lookup symbol-name))))
 
-(define-key slime-editing-map (kbd "C-c r") 'slime-restart-inferior-lisp)
+(defun slime-restart ()
+  (interactive)
+  (slime-restart-inferior-lisp)
+  (slime-repl-clear-buffer))
+
+(define-key slime-editing-map (kbd "C-c r") 'slime-restart)
 (define-key slime-editing-map (kbd "C-c q") 'slime-quit)
 (define-key slime-editing-map (kbd "C-c e") 'slime-eval-buffer)
 (define-key slime-editing-map (kbd "C-c C-d C-s") 'hyperspec-lookup-other-window)
@@ -260,6 +270,11 @@
   :config
   (setq slime-company-completion 'fuzzy))
 
+
+;; ------ scrbl ------
+(use-package scribble
+  :config
+  (push ?\@ company-insertion-triggers))
 
 ;; ----- Undo tree -----
 (use-package undo-tree
@@ -799,3 +814,5 @@ block."
 
 ;; ----- Shell -----
 (global-set-key (kbd "C-c t") 'shell)
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)

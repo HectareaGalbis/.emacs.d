@@ -1,1 +1,1 @@
-("~/.emacs.d/")
+("~/.emacs.d/" "~/quicklisp/local-projects/adp-github/" "~/quicklisp/local-projects/adp/" "~/quicklisp/local-projects/clith/" "~/quicklisp/local-projects/adp-plain/")

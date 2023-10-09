@@ -3,11 +3,13 @@
 
 (setq mc/cmds-to-run-for-all
       '(
-	backward-sexp
-	forward-sexp
-	slime-autodoc-space
-	))
+        backward-sexp
+        forward-sexp
+        markdown-outdent-or-delete
+        slime-autodoc-space
+        swiper-mc
+        ))
 
 (setq mc/cmds-to-run-once
       '(
-	))
+        ))
