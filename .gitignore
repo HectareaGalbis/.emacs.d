@@ -1,2 +1,3 @@
-undo-tree-history
-tmp
+*
+!.gitignore
+!init.el
