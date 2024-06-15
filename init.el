@@ -14,6 +14,11 @@
 ;; On terminal: sudo apt install python3 python-is-python3 pipx
 ;; On terminal: sudo pipx install cmake-language-server
 
+;; ------ slime ------
+;; Para usar slime necesitamos un compilador de Common Lisp. O dos, ¿por qué no?
+;; On terminal: sudo apt install sbcl clisp
+
+
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
@@ -39,6 +44,7 @@
 (set-face-attribute 'default nil :height 120)                ; Make font scale a bit larger
 (blink-cursor-mode 0)                                        ; Stops blink cursor
 (setq make-backup-files nil)                                 ; Disable backup files
+(setq warning-minimum-level :error)                          ; Disable the pop-up of *Warnings* buffer
 
 ;; Global keybindings
 (global-set-key (kbd "C-+") 'text-scale-increase)
@@ -230,120 +236,48 @@
 
 
 ;; ------ eglot ------
-;; Recordar que para c++ hay que instalar clangd. Pero tambien hay que asegurarse de que clang
-;; usa el compilador de c++. En ubuntu 24 he tenido que instalar g++-14.
 (add-hook 'c++-mode-hook 'eglot-ensure)
 (add-hook 'cmake-mode-hook 'eglot-ensure)
 
 
+;; ------ sly ------
+(use-package sly
+  :init
+  (setq sly-lisp-implementations '((sbcl  ("/usr/bin/sbcl"))
+                                   (clisp ("/usr/bin/clisp"))))
+  :bind (:map sly-mode-map
+              ("C-c r" . sly-restart-inferior-lisp)
+              ("C-c l" . sly-mrepl-clear-repl)))
+
+(defun hyperspec-lookup-other-window (symbol-name)
+  "Looks up in the hyperspec a the symbol at point opening a web browser."
+  (interactive (list (common-lisp-hyperspec-read-symbol-name
+                      (sly-symbol-at-point))))
+  (let ((window-to-use (or (get-buffer-window "*eww*")
+			   (if (and (eq browse-url-browser-function 'eww-browse-url)
+				    (= (count-windows) 1))
+			       (split-window-right)
+			     (next-window)))))
+    (with-selected-window (or window-to-use (selected-window))
+      (hyperspec-lookup symbol-name))))
+
+(define-key sly-mode-map (kbd "C-c C-d C-s") #'hyperspec-lookup-other-window)
+
+
+;; ------ scrbl ------
+(use-package scribble-mode
+  :config
+  (modify-syntax-entry ?: "_ " scribble-mode-syntax-table)
+  (push `(,(rx (or space "(" "[" "{") (group (zero-or-one "#") ":" (+ (not (any space ")" "]" "}")))))
+          (1 font-lock-keyword-face))
+        scribble-mode-font-lock-keywords))
+
+
+
+
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
-
-
-;; ------ company ------
-;; (use-package company
-;;   :bind (:map company-active-map
-;;               ("<tab>" . company-complete-selection)))
-
-
-
-;; ----- Slime -----
-;; (use-package slime
-;;   :init
-;;   (setq slime-lisp-implementations         '((sbcl  ("/usr/bin/sbcl"))))
-;;   :config
-;;   (slime-setup '(slime-fancy slime-company)))
-
-;; (defun slime-frame ()
-;;   "Init slime in a new frame."
-;;   (interactive)
-;;   (let ((display-buffer-alist '(("\\*inferior-lisp\\*" display-buffer-pop-up-frame (nil)))))
-;;     (slime)))
-
-;; (defun slime-remote ()
-;;   (interactive)
-;;   (shell-command "ssh -M -S ~/slime-tunnel -o \"ExitOnForwardFailure yes\" -L4005:localhost:4005 -fN root@134.122.82.19")
-;;   (slime-connect "localhost" 4005))
-
-;; (defun slime-quit ()
-;;   "Terminate inferior Lisp process and kill the buffer *inferior lisp*."
-;;   (interactive)
-;;   (if (get-buffer "*inferior-lisp*")
-;;       (slime-quit-lisp)
-;;     (slime-disconnect)
-;;     (shell-command "ssh -S ~/slime-tunnel -O exit root@134.122.82.19"))
-;;   (message "Connection closed."))
-
-;; (defun hyperspec-lookup-other-window (symbol-name)
-;;   "Another wrapper for hyperspec-lookup"
-;;   (interactive (list (common-lisp-hyperspec-read-symbol-name
-;;                       (slime-symbol-at-point))))
-;;   (let ((window-to-use (or (get-buffer-window "*eww*")
-;; 			   (if (and (eq browse-url-browser-function 'eww-browse-url)
-;; 				    (= (count-windows) 1))
-;; 			       (split-window-right)
-;; 			     (next-window)))))
-;;     (with-selected-window (or window-to-use (selected-window))
-;;       (hyperspec-lookup symbol-name))))
-
-;; (defun slime-restart ()
-;;   (interactive)
-;;   (slime-restart-inferior-lisp)
-;;   (slime-repl-clear-buffer))
-
-;; (define-key slime-editing-map (kbd "C-c r") 'slime-restart)
-;; (define-key slime-editing-map (kbd "C-c q") 'slime-quit)
-;; (define-key slime-editing-map (kbd "C-c e") 'slime-eval-buffer)
-;; (define-key slime-editing-map (kbd "C-c C-d C-s") 'hyperspec-lookup-other-window)
-
-
-;; (defun create-lisp-image (systems file)
-;;   "Create a core Lisp image with SYSTEMS loaded on it.  Save the image at FILE path."
-;;   (interactive "MWrite the systems to be loaded in the image:\nFWrite the path where to store the image:")
-;;   (let* ((system-names (split-string systems))
-;; 	 (eval-forms (apply 'concat (mapcar (lambda (name)
-;; 						(format " --eval \"(asdf:load-system :%s)\" " name))
-;; 					    system-names)))
-;; 	 (save-form (format " --eval \"(sb-ext:save-lisp-and-die #P\\\"%s\\\")\" " file))
-;; 	 (command (concat "sbcl " eval-forms save-form)))
-;;     (async-shell-command command)))
-
-;; (defun slime-create-executable (system file)
-;;   "Create a core Lisp image with SYSTEMS loaded on it.  Save the image at FILE path."
-;;   (interactive "MWrite the systems to be loaded in the image:\nFWrite the path where to store the image:")
-;;   (let* ((system-names (split-string systems))
-;; 	 (eval-form (format " --eval \"(asdf:load-system :%s)\" " system))
-;; 	 (save-form (format " --eval \"(sb-ext:save-lisp-and-die #P\\\"%s\\\" :toplevel #'main :executable t)\" " file))
-;; 	 (command (concat "sbcl " eval-forms save-form)))
-;;     (async-shell-command command)))
-
-;; (defun slime-from-image (image)
-;;   "Initiate slime with a given core Lisp IMAGE."
-;;   (interactive "fWrite the path where the image is stored:")
-;;   (let* ((core-form (format " --core %s " image))
-;; 	 (command (concat "sbcl " core-form)))
-;;     (slime command)))
-
-
-;; ;; ------ scrbl ------
-;; (use-package scribble-mode
-;;   :config
-;;   (modify-syntax-entry ?: "_ " scribble-mode-syntax-table)
-;;   (push `(,(rx (or space "(" "[" "{") (group (zero-or-one "#") ":" (+ (not (any space ")" "]" "}")))))
-;;           (1 font-lock-keyword-face))
-;;         scribble-mode-font-lock-keywords))
-
-
-
-;; ;; ------ slime-company ------
-;; (use-package slime-company
-;;   :after (slime company scribble-mode)
-;;   :config
-;;   (push 'scribble-mode slime-company-major-modes)
-;;   (setq slime-company-completion 'fuzzy))
-
-
 
 
 ;; ;; ------ org-mode ------
@@ -727,7 +661,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(lsp-mode-map flycheck lsp-mode nerd-icons-corfu corfu helpful multiple-cursors nerd-icons-completion line-numbers which-key vertico-directory all-the-icons-completion marginalia emacs-lisp orderless vertico consult electric-pair dired-hide-dotfiles all-the-icons-dired magit all-the-icons doom-modeline vscode-dark-plus-theme)))
+   '(sly slime lsp-mode-map flycheck lsp-mode nerd-icons-corfu corfu helpful multiple-cursors nerd-icons-completion line-numbers which-key vertico-directory all-the-icons-completion marginalia emacs-lisp orderless vertico consult electric-pair dired-hide-dotfiles all-the-icons-dired magit all-the-icons doom-modeline vscode-dark-plus-theme)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
