@@ -1,12 +1,27 @@
 
+;; Para que todo vaya perfectamente hay que instalar algunos paquetes externos de manera manual:
+
+;; ------ nerd-icons ------
+;; Recordar evaluar esto para instalar los iconos si es la primera vez que se usa este archivo de configuracion.
+;; Inside emacs: M-x nerd-icons-install-fonts
+
+;; ------ eglot ------
+;; Para usar C++ hay que instalar clangd. Pero tambien hay que asegurarse de que clang
+;; usa el compilador de c++. En ubuntu 24 he tenido que instalar g++-14.
+;; On terminal: sudo apt install clangd g++-14
+
+;; Para usar cmake
+;; On terminal: sudo apt install python3 python-is-python3 pipx
+;; On terminal: sudo pipx install cmake-language-server
 
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
 
 
-;; En esta primera parte del fichero de configuración se ajusta el comportamiento de emacs de manera global y usando
-;; únicamente variables propias de emacs. Se cambian cosas como algunos atajos de teclado o la apariencia de emacs.
+;; En esta primera parte del fichero de configuración se ajusta el comportamiento de emacs de manera
+;; global y usando únicamente variables propias de emacs. Se cambian cosas como algunos atajos de
+;; teclado o la apariencia de emacs.
 
 
 ;; ------ Starting up emacs ------
@@ -23,6 +38,7 @@
 (setq-default indent-tabs-mode nil)                          ; Prevents extraneous tabs
 (set-face-attribute 'default nil :height 120)                ; Make font scale a bit larger
 (blink-cursor-mode 0)                                        ; Stops blink cursor
+(setq make-backup-files nil)                                 ; Disable backup files
 
 ;; Global keybindings
 (global-set-key (kbd "C-+") 'text-scale-increase)
@@ -68,6 +84,10 @@
 (show-paren-mode 1)
 
 
+;; ------ PATH ------
+(add-to-list 'exec-path (expand-file-name "~/.local/bin")) ; Necesario para cmake-language-server
+
+
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
@@ -98,6 +118,10 @@
   :init (doom-modeline-mode 1))
 
 
+;; ------ project ------
+(setq project-switch-commands 'project-find-file)
+
+
 ;; ------ magit ------
 (use-package magit)
 
@@ -115,6 +139,17 @@
               ("H" . dired-hide-dotfiles-mode)))
 
 
+;; ------ corfu ------
+(use-package corfu
+  :init
+  (global-corfu-mode)
+  :bind (:map corfu-map
+              ("RET" . nil))
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t))
+
+
 ;; ------ vertico ------
 (use-package vertico
   :config
@@ -124,6 +159,7 @@
 (use-package vertico-directory
   :ensure nil
   :bind (:map vertico-map
+              ("TAB" . vertico-directory-enter)
               ("RET" . vertico-directory-enter)
               ("DEL" . vertico-directory-delete-char)
               ("M-DEL" . vertico-directory-delete-word)))
@@ -163,6 +199,10 @@
   :config
   (nerd-icons-completion-mode 1))
 
+(use-package nerd-icons-corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
 
 ;; ------- Which key mode -------
 (use-package which-key
@@ -185,12 +225,20 @@
   (add-hook 'prog-mode-hook 'display-line-numbers-mode))
 
 
-;; -------------------------------------------------------------------------------------------------
-;; -------------------------------------------------------------------------------------------------
-;; -------------------------------------------------------------------------------------------------
+;; ------ cmake-mode ------
+(use-package cmake-mode)
 
 
-;; En esta sección se instalan . Cada modo mayor se encarga de elegir qué modos menores activar.
+;; ------ eglot ------
+;; Recordar que para c++ hay que instalar clangd. Pero tambien hay que asegurarse de que clang
+;; usa el compilador de c++. En ubuntu 24 he tenido que instalar g++-14.
+(add-hook 'c++-mode-hook 'eglot-ensure)
+(add-hook 'cmake-mode-hook 'eglot-ensure)
+
+
+;; -------------------------------------------------------------------------------------------------
+;; -------------------------------------------------------------------------------------------------
+;; -------------------------------------------------------------------------------------------------
 
 
 ;; ------ company ------
@@ -679,7 +727,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(helpful multiple-cursors nerd-icons-completion line-numbers which-key vertico-directory all-the-icons-completion marginalia emacs-lisp orderless vertico consult electric-pair dired-hide-dotfiles all-the-icons-dired magit all-the-icons doom-modeline vscode-dark-plus-theme)))
+   '(lsp-mode-map flycheck lsp-mode nerd-icons-corfu corfu helpful multiple-cursors nerd-icons-completion line-numbers which-key vertico-directory all-the-icons-completion marginalia emacs-lisp orderless vertico consult electric-pair dired-hide-dotfiles all-the-icons-dired magit all-the-icons doom-modeline vscode-dark-plus-theme)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
