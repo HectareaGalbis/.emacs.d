@@ -14,6 +14,8 @@
 ;; de Docker:
 ;; RUN git config --global --add safe.directory /path/to/project
 
+;; Al parecer, esto no funciona. El comando solo funciona si se ejecuta una vez estamos dentro del contenedor.
+
 ;; Por otro lado, para que Eglot vaya correctamente en Docker necesitamos los servidores LSP instalados
 ;; en la imagen. A continuación se muestra qué hay que instalar en dicha imagen para cada lenguaje de
 ;; programación.
@@ -276,6 +278,14 @@
   :init (setq markdown-command "multimarkdown"))
 
 
+;; ------ clang-format ------
+(use-package clang-format)
+(add-hook 'c++-mode-hook (lambda ()
+                           (setq clang-format-style "WebKit")
+                           (setq c-basic-offset 4)
+                           (define-key c++-mode-map (kbd "<tab>") 'clang-format-region)))
+
+
 ;; ------ eglot ------
 (defmacro define-eglot-modes (&rest modes)
   `(progn
@@ -284,6 +294,10 @@
                modes)))
 
 (define-eglot-modes c++-mode cmake-mode python-mode)
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '((c-mode c++-mode) . ("clangd" "--header-insertion=never"))))
 
 
 ;; ------ sly ------
@@ -309,6 +323,25 @@
         scribble-mode-font-lock-keywords))
 
 
+;; ------ org ------
+(use-package org
+  :bind (:map org-mode-map
+              ("C-M-<up>" . 'org-metaup)
+              ("C-M-<down>" . 'org-metadown)
+              ("M-<down>" . 'custom-scroll-up)
+              ("M-<up>" . 'custom-scroll-down)
+              ("M-S-<up>" . 'fast-scroll-down)
+              ("M-S-<down>" . 'fast-scroll-up))
+  :config
+  (setq org-support-shift-select 'always))
+
+
+;; ------ org-babel ------
+(use-package babel
+  :config
+  (org-babel-do-load-languages 'org-babel-load-languages '((C . t))))
+
+
 ;; ----------------------------------------------------------------------
 ;; ----------------------------------------------------------------------
 ;; ----------------------------------------------------------------------
@@ -322,10 +355,13 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(scribble-mode sly which-key vscode-dark-plus-theme vertico orderless nerd-icons-dired nerd-icons-corfu nerd-icons-completion multiple-cursors markdown-mode marginalia magit doom-modeline dockerfile-mode dired-hide-dotfiles corfu consult cmake-mode)))
+   '(babel org-babel org-mode org-beautify-theme scribble-mode sly which-key vscode-dark-plus-theme vertico orderless nerd-icons-dired nerd-icons-corfu nerd-icons-completion multiple-cursors markdown-mode marginalia magit doom-modeline dockerfile-mode dired-hide-dotfiles corfu consult cmake-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(org-level-1 ((t (:extend nil :foreground "#4ec9b0" :weight normal :height 2.0))))
+ '(org-level-2 ((t (:extend nil :foreground "#9cdcfe" :weight normal :height 1.5))))
+ '(org-level-3 ((t (:extend nil :foreground "#569cd6" :weight normal :height 1.3))))
+ '(org-level-4 ((t (:extend nil :foreground "#dcdcaa" :weight normal :height 1.1)))))
