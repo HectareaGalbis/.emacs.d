@@ -333,7 +333,16 @@
               ("M-S-<up>" . 'fast-scroll-down)
               ("M-S-<down>" . 'fast-scroll-up))
   :config
-  (setq org-support-shift-select 'always))
+  (setq org-support-shift-select 'always)
+  (add-hook 'org-mode-hook 'visual-line-mode))
+
+
+;; ------ visual-fill-column ------
+(use-package visual-fill-column
+  :config
+  (add-hook 'visual-line-mode-hook 'visual-fill-column-mode)
+  (setq-default visual-fill-column-center-text t)
+  (setq-default visual-fill-column-width 100))
 
 
 ;; ------ org-babel ------
@@ -355,7 +364,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(babel org-babel org-mode org-beautify-theme scribble-mode sly which-key vscode-dark-plus-theme vertico orderless nerd-icons-dired nerd-icons-corfu nerd-icons-completion multiple-cursors markdown-mode marginalia magit doom-modeline dockerfile-mode dired-hide-dotfiles corfu consult cmake-mode)))
+   '(visual-fill-column babel org-babel org-mode org-beautify-theme scribble-mode sly which-key vscode-dark-plus-theme vertico orderless nerd-icons-dired nerd-icons-corfu nerd-icons-completion multiple-cursors markdown-mode marginalia magit doom-modeline dockerfile-mode dired-hide-dotfiles corfu consult cmake-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -364,4 +373,5 @@
  '(org-level-1 ((t (:extend nil :foreground "#4ec9b0" :weight normal :height 2.0))))
  '(org-level-2 ((t (:extend nil :foreground "#9cdcfe" :weight normal :height 1.5))))
  '(org-level-3 ((t (:extend nil :foreground "#569cd6" :weight normal :height 1.3))))
- '(org-level-4 ((t (:extend nil :foreground "#dcdcaa" :weight normal :height 1.1)))))
+ '(org-level-4 ((t (:extend nil :foreground "#dcdcaa" :weight normal :height 1.1))))
+ '(variable-pitch ((t (:family "Sans Serif")))))
