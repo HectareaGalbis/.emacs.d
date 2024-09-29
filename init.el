@@ -52,6 +52,12 @@
 ;; On terminal: sudo apt install sbcl clisp
 
 
+;; ------ gptel ------
+;; Para usar gptel es necesario usar un modelo de IA. En concreto uso gpt4all.
+;; Una vez instalado hay que asegurarse de activar la opcion 'Enable Local API Server'.
+;; Instalamos un modelo y especificamos su nombre en la configuracion de gptel.
+
+
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
 ;; -------------------------------------------------------------------------------------------------
@@ -69,7 +75,7 @@
 (setq frame-resize-pixelwise t)                              ; Adjust to window correctly
 (delete-selection-mode 1)                                    ; Follow the convention of modern editors
 (setq-default indent-tabs-mode nil)                          ; Prevents extraneous tabs
-;; (set-face-attribute 'default nil :height 100)                ; Make font scale a bit larger
+(set-face-attribute 'default nil :height 120)                ; Make font scale a bit larger
 (blink-cursor-mode 0)                                        ; Stops blink cursor
 (setq make-backup-files nil)                                 ; Disable backup files
 (setq warning-minimum-level :error)                          ; Disable the pop-up of *Warnings* buffer
@@ -297,7 +303,10 @@
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
-               '((c-mode c++-mode) . ("clangd" "--header-insertion=never"))))
+               '((c-mode c++-mode) . ("clangd" "--header-insertion=never")))
+  (add-hook 'eglot-connect-hook
+            (lambda ()
+              (setq eglot-cla))))
 
 
 ;; ------ sly ------
@@ -351,6 +360,24 @@
   (org-babel-do-load-languages 'org-babel-load-languages '((C . t))))
 
 
+;; ------ spacious-padding ------
+(use-package spacious-padding
+  :hook (after-init . spacious-padding-mode))
+
+
+;; ------ gptel ------
+(use-package gptel
+
+  :config
+  (setq
+   gptel-max-tokens 500
+   gptel-model "Meta-Llama-3-8B-Instruct.Q4_0.gguf"
+   gptel-backend (gptel-make-gpt4all "GPT4All"
+                   :protocol "http"
+                   :host "localhost:4891"
+                   :models '("Meta-Llama-3-8B-Instruct.Q4_0.gguf"))))
+
+
 ;; ----------------------------------------------------------------------
 ;; ----------------------------------------------------------------------
 ;; ----------------------------------------------------------------------
@@ -364,7 +391,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(visual-fill-column babel org-babel org-mode org-beautify-theme scribble-mode sly which-key vscode-dark-plus-theme vertico orderless nerd-icons-dired nerd-icons-corfu nerd-icons-completion multiple-cursors markdown-mode marginalia magit doom-modeline dockerfile-mode dired-hide-dotfiles corfu consult cmake-mode)))
+   '(spacious-padding gptel-quick visual-fill-column babel org-babel org-mode org-beautify-theme scribble-mode sly which-key vscode-dark-plus-theme vertico orderless nerd-icons-dired nerd-icons-corfu nerd-icons-completion multiple-cursors markdown-mode marginalia magit doom-modeline dockerfile-mode dired-hide-dotfiles corfu consult cmake-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
