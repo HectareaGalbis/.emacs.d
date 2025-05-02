@@ -186,7 +186,8 @@
   :init
   (global-corfu-mode)
   :bind (:map corfu-map
-              ("RET" . nil))
+              ("RET" . nil)
+              ("TAB" . #'corfu-complete))
   :custom
   (corfu-auto t)
   (corfu-cycle t)
