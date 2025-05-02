@@ -1,3 +1,4 @@
 *
 !.gitignore
 !init.el
+!cl-scribble-mode
