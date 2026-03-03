@@ -13,6 +13,8 @@
 ;; usando Tramp en Docker. Una solución rápida y sencilla es ejecutar el siguiente comando en la imagen
 ;; de Docker:
 ;; RUN git config --global --add safe.directory /path/to/project
+;;
+;; No se, pero esto no funciona. Sólo funciona si se ejecuta el comando dentro del contenedor.
 
 ;; Por otro lado, para que Eglot vaya correctamente en Docker necesitamos los servidores LSP instalados
 ;; en la imagen. A continuación se muestra qué hay que instalar en dicha imagen para cada lenguaje de
@@ -120,6 +122,10 @@
 (show-paren-mode 1)
 
 
+;; ------ shell ------
+(setq sh-basic-offset 2)
+
+
 ;; ------ PATH ------
 (add-to-list 'exec-path (expand-file-name "~/.local/bin")) ; Necesario para cmake-language-server en local
 
@@ -152,6 +158,17 @@
   :init (doom-modeline-mode 1))
 
 
+;; ------ dogears ------
+(use-package dogears
+  ;; These bindings are optional, of course:
+  :bind (:map global-map
+              ("M-<left>" . dogears-back)
+              ("M-<right>" . dogears-forward))
+  :config
+  (setq dogears-functions '(beginning-of-buffer end-of-buffer))
+  (dogears-mode))
+
+
 ;; ------ project ------
 (setq project-switch-commands 'project-find-file)
 
@@ -172,6 +189,12 @@
   :bind (:map dired-mode-map
               ("H" . dired-hide-dotfiles-mode)))
 
+;; ------ yasnippet ------
+;; (use-package yasnippet
+;;   :config
+;;   (yas-global-mode 1)
+;;   (setq yas-snippet-dirs '("~/.emacs.d/snippets")))
+
 
 ;; ------ corfu ------
 (use-package corfu
@@ -184,6 +207,8 @@
   (corfu-cycle t)
   (corfu-auto-prefix 2)
   (corfu-auto-delay 0.1)
+  (corfu-quit-no-match t)
+  (corfu-on-exact-match nil)
   :config
   (add-hook 'after-save-hook #'corfu-quit))
 
@@ -222,7 +247,8 @@
   :bind (("C-x b" . consult-buffer)
          ("M-g g" . consult-goto-line)
          ("M-g M-g" . consult-goto-line)
-         ("C-s" . consult-line)))
+         ("C-s" . consult-line)
+         ("M-y" . consult-yank-pop)))
 
 
 ;; ----- nerd-icons ------
@@ -265,6 +291,17 @@
 (use-package cmake-mode)
 
 
+;; ------ crontab ------
+(use-package crontab-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.crontab\\'" . crontab-mode)))
+
+
+;; ------ bash-completion ------
+(use-package bash-completion
+  :config
+  (bash-completion-setup))
+
 ;; ------ dockerfile ------
 (use-package dockerfile-mode)
 
@@ -276,6 +313,31 @@
   :init (setq markdown-command "multimarkdown"))
 
 
+;; ------ clang-format ------
+(use-package clang-format)
+
+(defmacro setup-custom-style (mode)
+  `(add-hook ',(derived-mode-hook-name mode)
+             (lambda ()
+               (setq clang-format-style "WebKit")
+               (add-hook 'before-save-hook #'clang-format-buffer nil t))))
+
+(setup-custom-style c-mode)
+(setup-custom-style c++-mode)
+
+
+;; ------ semantic-refactor ------ Me esta dando errores con TRAMP
+;; (use-package srefactor
+;;   :hook (c++-mode . semantic-mode)
+;;   :bind (("C-c r" . srefactor-refactor-at-point)))
+
+
+;; ------ python-black ------
+(use-package python-black
+  :after python
+  :hook (python-mode . python-black-on-save-mode))
+
+
 ;; ------ eglot ------
 (defmacro define-eglot-modes (&rest modes)
   `(progn
@@ -283,7 +345,15 @@
                  `(add-hook ',(derived-mode-hook-name mode) 'eglot-ensure))
                modes)))
 
-(define-eglot-modes c++-mode cmake-mode python-mode)
+(define-eglot-modes c-mode c++-mode cmake-mode python-mode sh-mode)
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '((c-mode c++-mode) . ("clangd"
+                                      "--header-insertion=never"
+                                      "--fallback-style=webkit")))
+  (add-to-list 'eglot-server-programs
+               '((sh-mode bash-ts-mode) . ("bash-language-server" "start"))))
 
 
 ;; ------ sly ------
@@ -309,6 +379,107 @@
         scribble-mode-font-lock-keywords))
 
 
+;; ------ spacious-padding ------
+(use-package spacious-padding
+  :hook (after-init . spacious-padding-mode))
+
+
+;; ------ google translate ------
+(use-package google-translate
+  :config
+  (global-set-key (kbd "C-c t") 'google-translate-at-point)
+  (global-set-key (kbd "C-c T") 'google-translate-smooth-translate))
+
+
+;; ------ gcloud tramp ------
+(require 'tramp)
+(add-to-list 'tramp-methods
+             '("gctest"
+               (tramp-login-program        "gcloud compute ssh --project=meteored-test")
+               (tramp-login-args           (("%h")))
+               (tramp-async-args           (("-q")))
+               (tramp-remote-shell         "/bin/sh")
+               (tramp-remote-shell-args    ("-c"))
+               (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+                                            ("-o" "UserKnownHostsFile=/dev/null")
+                                            ("-o" "StrictHostKeyChecking=no")))
+               (tramp-default-port         22)))
+(add-to-list 'tramp-methods
+             '("gcprod"
+               (tramp-login-program        "gcloud compute ssh --project=api-project-858154548956")
+               (tramp-login-args           (("%h")))
+               (tramp-async-args           (("-q")))
+               (tramp-remote-shell         "/bin/sh")
+               (tramp-remote-shell-args    ("-c"))
+               (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+                                            ("-o" "UserKnownHostsFile=/dev/null")
+                                            ("-o" "StrictHostKeyChecking=no")))
+               (tramp-default-port         22)))
+;; (add-to-list 'tramp-methods
+;;              '("gcssh-test"
+;;                (tramp-login-program        "gcloud compute ssh")
+;;                (tramp-login-args           (("%h")))
+;;                (tramp-async-args           (("-q")))
+;;                (tramp-remote-shell         "/bin/sh")
+;;                (tramp-remote-shell-args    ("-c"))
+;;                (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+;;                                             ("-o" "UserKnownHostsFile=/dev/null")
+;;                                             ("-o" "StrictHostKeyChecking=no")))
+;;                (tramp-default-port         22)))
+
+;; (add-to-list 'tramp-methods
+;;              '("gcssh-prod"
+;;                (tramp-login-program        "gcloud compute ssh --project=api-project-858154548956")
+;;                (tramp-login-args           (("%h")))
+;;                (tramp-async-args           (("-q")))
+;;                (tramp-remote-shell         "/bin/sh")
+;;                (tramp-remote-shell-args    ("-c"))
+;;                (tramp-gw-args              (("-o" "GlobalKnownHostsFile=/dev/null")
+;;                                             ("-o" "UserKnownHostsFile=/dev/null")
+;;                                             ("-o" "StrictHostKeyChecking=no")))
+;;                (tramp-default-port         22)))
+
+(defun prepare-instances (project)
+  (let* ((command (concat "gcloud compute instances list --project=" project " --format='value(name)' --filter='status=RUNNING'"))
+         (output (shell-command-to-string command))
+         (instances (split-string output "\n" t)))
+    (mapcar (lambda (instance)
+              (list nil instance))
+            instances)))
+
+(defun tramp-gcloud-test-completion-function (file)
+  "Retorna lista de instancias de Google Cloud Compute."
+  (prepare-instances "meteored-test"))
+
+(defun tramp-gcloud-prod-completion-function (file)
+  "Retorna lista de instancias de Google Cloud Compute."
+  (prepare-instances "api-project-858154548956"))
+
+(tramp-set-completion-function "gctest"
+                               '((tramp-gcloud-test-completion-function "")))
+(tramp-set-completion-function "gcprod"
+                               '((tramp-gcloud-prod-completion-function "")))
+
+
+;; ------ treemacs ------
+(use-package treemacs
+  :config
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t)
+  :bind
+  (("M-0"       . treemacs-select-window)
+   ("C-x t 1"   . treemacs-delete-other-windows)
+   ("C-x t t"   . treemacs-add-and-display-current-project)
+   ("C-x t d"   . treemacs-select-directory)
+   ("C-x t B"   . treemacs-bookmark)
+   ("C-x t C-t" . treemacs-find-file)
+   ("C-x t M-t" . treemacs-find-tag)))
+
+
+;; ------ copilot ------
+(add-to-list 'load-path "~/copilot.el")
+(require 'copilot)
+
 ;; ----------------------------------------------------------------------
 ;; ----------------------------------------------------------------------
 ;; ----------------------------------------------------------------------
@@ -321,11 +492,24 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(eglot-ignored-server-capabilities '(:inlayHintProvider))
  '(package-selected-packages
-   '(scribble-mode sly which-key vscode-dark-plus-theme vertico orderless nerd-icons-dired nerd-icons-corfu nerd-icons-completion multiple-cursors markdown-mode marginalia magit doom-modeline dockerfile-mode dired-hide-dotfiles corfu consult cmake-mode)))
+   '(bash-completion clang-format+ cmake-mode consult corfu crontab-mode
+                     dired-hide-dotfiles dockerfile-mode dogears
+                     doom-modeline flymake-python-pyflakes
+                     google-translate magit marginalia markdown-mode
+                     multiple-cursors nerd-icons-completion
+                     nerd-icons-corfu nerd-icons-dired orderless
+                     php-mode pylint python-black scribble-mode sly
+                     spacious-padding srefactor treemacs
+                     typescript-mode vertico vscode-dark-plus-theme
+                     which-key yaml-mode yasnippet))
+ '(package-vc-selected-packages
+   '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch
+              "main"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(sh-heredoc ((t (:foreground "#ce9178")))))
